@@ -120,7 +120,12 @@ class Game:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 state = button.unpress()
                                 if state:
-                                    print(i)
+                                    if i == 0:
+                                        pass
+                                    elif i == 1:
+                                        pass
+                                    elif i == 2:
+                                        self.terminate()
                         self.buttons_group.update()
 
             update_screen()
