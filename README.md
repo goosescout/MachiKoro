@@ -1,2 +1,2 @@
 # MachiKoro
-Мачи Коро онлайн
+Machi Koro online game
