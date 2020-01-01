@@ -187,7 +187,8 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
-        searching = False
+        searching_for_game = False
+        game_found = [False]
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -211,20 +212,18 @@ class Game:
                                 state = button.unpress()
                                 if state:
                                     if i == 0:
-                                        searching = True
+                                        searching_for_game = True
                                         stop = [False]
-                                        game_found = [False]
                                         Notification(self.notification_group, ('searching for the game...',))
 
                                         def search(stop, game_found):
-                                            print(stop, game_found)
                                             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                                             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
                                             s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
                                             s.bind(('0.0.0.0', 11719))
                                             while True:
                                                 message = s.recv(128).decode('utf-8')
-                                                if message == 'searching for players':
+                                                if message.startswith('searching for players'):
                                                     game_found[0] = True
                                                     stop[0] = True
                                                 if stop[0]:
@@ -243,20 +242,22 @@ class Game:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
                                             stop = True
-                                            searching = False
+                                            searching_for_game = False
+                                            game_found = [False]
                         self.buttons_group.update()
 
             update_screen()
             self.buttons_group.draw(self.screen)
             self.notification_group.draw(self.screen)
-            if searching:
+            if searching_for_game:
                 if counter % 10 == 0:
                     self.notification_group.empty()
                     Notification(self.notification_group, ('searching for the game' + "." * (counter % 3 + 1),))
-                if game_found[0]:
+            if game_found[0]:
+                searching_for_game = False
+                if counter % 10 == 0:
                     self.notification_group.empty()
-                    searching = False
-                    Notification(self.notification_group, ('game is found',))
+                    Notification(self.notification_group, ('game is ready', 'connecting' + "." * (counter % 3 + 1)))
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
             self.clock.tick(self.FPS)
