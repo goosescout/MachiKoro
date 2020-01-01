@@ -1,8 +1,22 @@
 import pygame
 import os
 import sys
+import threading
+import socket
 
 from utility import load_image
+
+
+class MyThread(threading.Thread):
+    def __init__(self, func, *args, **kwargs):
+        super().__init__()
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+
+    def run(self):
+        self.func(*self.args, **self.kwargs)
 
 
 class Notification(pygame.sprite.Sprite):
@@ -173,6 +187,7 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
+        searching = False
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -195,8 +210,28 @@ class Game:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 state = button.unpress()
                                 if state:
-                                    if i == 0: 
+                                    if i == 0:
+                                        searching = True
+                                        stop = [False]
+                                        game_found = [False]
                                         Notification(self.notification_group, ('searching for the game...',))
+
+                                        def search(stop, game_found):
+                                            print(stop, game_found)
+                                            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                                            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+                                            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
+                                            s.bind(('0.0.0.0', 11719))
+                                            while True:
+                                                message = s.recv(128).decode('utf-8')
+                                                if message == 'searching for players':
+                                                    game_found[0] = True
+                                                    stop[0] = True
+                                                if stop[0]:
+                                                    break
+
+                                        thread = MyThread(search, stop, game_found)
+                                        thread.start()
                                     elif i == 1:
                                         pass
                                     elif i == 2:
@@ -207,15 +242,21 @@ class Game:
                                     if elem.unpress():
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
+                                            stop = True
+                                            searching = False
                         self.buttons_group.update()
 
             update_screen()
             self.buttons_group.draw(self.screen)
             self.notification_group.draw(self.screen)
-            if self.notification_group:
+            if searching:
                 if counter % 10 == 0:
                     self.notification_group.empty()
                     Notification(self.notification_group, ('searching for the game' + "." * (counter % 3 + 1),))
+                if game_found[0]:
+                    self.notification_group.empty()
+                    searching = False
+                    Notification(self.notification_group, ('game is found',))
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
             self.clock.tick(self.FPS)
