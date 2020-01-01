@@ -5,6 +5,23 @@ import sys
 from utility import load_image
 
 
+class Notification(pygame.sprite.Sprite):
+    def __init__(self, group, text, font='data/DisposableDroidBB.ttf', fontsize=50, color=pygame.Color('black')):
+        super().__init__(group)
+        self.image = pygame.transform.scale(load_image('button.png'), (880, 320))
+        self.rect = self.image.get_rect()
+        self.rect.x = 200
+        self.rect.y = 200
+
+        font = pygame.font.Font(font, fontsize)
+        shift = 280 // (len(text) + 1 )
+        for i, line in enumerate(text):
+            line = font.render(line, 1, color)
+            self.image.blit(line, (20, shift * (i + 1)))
+
+        Button(group, 910, 450, 'close', size=(150, 50), fontsize=50)
+
+
 class Cursor(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -18,7 +35,7 @@ class Cursor(pygame.sprite.Sprite):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, x, y, text, size=None, font='data/ARCADECLASSIC.TTF', fontsize=100, color=pygame.Color('black')):
+    def __init__(self, group, x, y, text, size=None, font='data/DisposableDroidBB.ttf', fontsize=100, color=pygame.Color('black')):
         super().__init__(group)
         self.group = group
         self.size = size
@@ -75,11 +92,14 @@ class Game:
         pygame.mouse.set_visible(False)
         self.WIDTH = 1280
         self.HEIGHT = 720
+        self.FPS = 30
+        self.clock = pygame.time.Clock()
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
 
         self.cursor_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
+        self.notification_group = pygame.sprite.Group()
         self.cursor = Cursor(self.cursor_group)
 
         self.start_screen()
@@ -90,6 +110,7 @@ class Game:
 
     def start_screen(self):
         self.buttons_group.empty()
+
         def update_screen():
             background = pygame.transform.scale(load_image(
                 'background.jfif'), (self.WIDTH, self.HEIGHT))
@@ -99,9 +120,9 @@ class Game:
 
         update_screen()
 
-        Button(self.buttons_group, 440, 300, 'play')
-        Button(self.buttons_group, 440, 420, 'rules')
-        Button(self.buttons_group, 440, 540, 'exit')
+        Button(self.buttons_group, 340, 300, 'play')
+        Button(self.buttons_group, 340, 420, 'rules')
+        Button(self.buttons_group, 340, 540, 'exit')
 
         while True:
             for event in pygame.event.get():
@@ -114,12 +135,12 @@ class Game:
                         for i, button in enumerate(self.buttons_group):
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 button.press()
+
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         for i, button in enumerate(self.buttons_group):
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
-                                state = button.unpress()
-                                if state:
+                                if button.unpress():
                                     if i == 0:
                                         self.game_connection_screen()
                                     elif i == 1:
@@ -132,10 +153,12 @@ class Game:
             self.buttons_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
+            self.clock.tick(self.FPS)
             pygame.display.flip()
 
     def game_connection_screen(self):
         self.buttons_group.empty()
+
         def update_screen():
             background = pygame.transform.scale(load_image(
                 'background.jfif'), (self.WIDTH, self.HEIGHT))
@@ -145,10 +168,11 @@ class Game:
 
         update_screen()
 
-        Button(self.buttons_group, 440, 300, 'connect')
-        Button(self.buttons_group, 440, 420, 'new game')
-        Button(self.buttons_group, 20, 650, 'back', size=[150, 50], fontsize=50)
+        Button(self.buttons_group, 340, 300, 'connect')
+        Button(self.buttons_group, 340, 420, 'new game')
+        Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
+        counter = 0
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -160,24 +184,42 @@ class Game:
                         for i, button in enumerate(self.buttons_group):
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 button.press()
+                        for elem in self.notification_group:
+                            if isinstance(elem, Button):
+                                if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                    elem.press()
+
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         for i, button in enumerate(self.buttons_group):
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 state = button.unpress()
                                 if state:
-                                    if i == 0:
-                                        self.game_connection_screen()
+                                    if i == 0: 
+                                        Notification(self.notification_group, ('searching for the game...',))
                                     elif i == 1:
                                         pass
                                     elif i == 2:
+                                        self.notification_group.empty()
                                         self.start_screen()
+                        for elem in self.notification_group:
+                            if isinstance(elem, Button):
+                                    if elem.unpress():
+                                        if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                            self.notification_group.empty()
                         self.buttons_group.update()
 
             update_screen()
             self.buttons_group.draw(self.screen)
+            self.notification_group.draw(self.screen)
+            if self.notification_group:
+                if counter % 10 == 0:
+                    self.notification_group.empty()
+                    Notification(self.notification_group, ('searching for the game' + "." * (counter % 3 + 1),))
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
+            self.clock.tick(self.FPS)
+            counter += 1
             pygame.display.flip()
 
     def mainloop(self):
