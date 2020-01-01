@@ -83,13 +83,13 @@ class Game:
         self.cursor = Cursor(self.cursor_group)
 
         self.start_screen()
-        self.mainloop()
 
     def terminate(self):
         pygame.quit()
         sys.exit()
 
     def start_screen(self):
+        self.buttons_group.empty()
         def update_screen():
             background = pygame.transform.scale(load_image(
                 'background.jfif'), (self.WIDTH, self.HEIGHT))
@@ -121,11 +121,57 @@ class Game:
                                 state = button.unpress()
                                 if state:
                                     if i == 0:
-                                        pass
+                                        self.game_connection_screen()
                                     elif i == 1:
                                         pass
                                     elif i == 2:
                                         self.terminate()
+                        self.buttons_group.update()
+
+            update_screen()
+            self.buttons_group.draw(self.screen)
+            if pygame.mouse.get_focused():
+                self.cursor_group.draw(self.screen)
+            pygame.display.flip()
+
+    def game_connection_screen(self):
+        self.buttons_group.empty()
+        def update_screen():
+            background = pygame.transform.scale(load_image(
+                'background.jfif'), (self.WIDTH, self.HEIGHT))
+            self.screen.blit(background, (0, 0))
+            logo = pygame.transform.scale(load_image('logo.png'), (880, 200))
+            self.screen.blit(logo, (200, 50))
+
+        update_screen()
+
+        Button(self.buttons_group, 440, 300, 'connect')
+        Button(self.buttons_group, 440, 420, 'new game')
+        Button(self.buttons_group, 20, 650, 'back', size=[150, 50], fontsize=50)
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.terminate()
+                if event.type == pygame.MOUSEMOTION:
+                    self.cursor_group.update()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        for i, button in enumerate(self.buttons_group):
+                            if button.rect.collidepoint(pygame.mouse.get_pos()):
+                                button.press()
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        for i, button in enumerate(self.buttons_group):
+                            if button.rect.collidepoint(pygame.mouse.get_pos()):
+                                state = button.unpress()
+                                if state:
+                                    if i == 0:
+                                        self.game_connection_screen()
+                                    elif i == 1:
+                                        pass
+                                    elif i == 2:
+                                        self.start_screen()
                         self.buttons_group.update()
 
             update_screen()
