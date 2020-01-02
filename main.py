@@ -199,7 +199,7 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
-        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': None, 'game_connected': False}
+        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': {'ip': -1}, 'game_connected': False}
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
