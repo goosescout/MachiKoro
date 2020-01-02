@@ -13,7 +13,7 @@ class MyThread(threading.Thread):
         self.kwargs = kwargs
         self.killed = False  
         self.flag = False 
-
+    '''
     def start(self): 
         self.__run_backup = self.run 
         self.run = self.__run       
@@ -39,7 +39,9 @@ class MyThread(threading.Thread):
     
     def kill(self): 
         self.killed = True
-
+    '''
+    def run(self):
+        self.func(*self.args, **self.kwargs)
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)

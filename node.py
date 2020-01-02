@@ -30,11 +30,12 @@ class Node:
         var = eval(message.decode('utf-8'))
         return eval(message.decode('utf-8'))
 
-    def await_recieve(self, data, match=None, flag=None, stop=True):
+    def await_recieve(self, data, match=None, flag=None, stop_count=1):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
         sock.bind(('0.0.0.0', self.port))
+        stop = 0
 
         while True:
             message = sock.recv(128)
@@ -48,7 +49,8 @@ class Node:
                                 elem[0][elem[1]].append(elem[2])
                             else:
                                 elem[0][elem[1]] = elem[2]
-                    if stop:
+                    stop += 1
+                    if stop == stop_count:
                         return eval(message.decode('utf-8'))
             else:
                 if data in eval(message.decode('utf-8'))[match]:
@@ -60,5 +62,6 @@ class Node:
                                 elem[0][elem[1]].append(elem[2])
                             else:
                                 elem[0][elem[1]] = elem[2]
-                    if stop:
+                    stop += 1
+                    if stop == stop_count:
                         return eval(message.decode('utf-8'))
