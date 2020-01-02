@@ -207,7 +207,16 @@ class Game:
             background = pygame.transform.scale(load_image(
                 'background.jfif'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-
+            font = pygame.font.Font(None, 50)
+            text_coord = 50
+            for line in rules[page_num]:
+                string_rendered = font.render(line, 1, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                text_coord += 10
+                intro_rect.top = text_coord
+                intro_rect.x = 10
+                text_coord += intro_rect.height
+                self.screen.blit(string_rendered, intro_rect)
 
         update_screen()
 
@@ -215,8 +224,6 @@ class Game:
         Button(self.buttons_group, 540, 650, 'prev', (300, 50), fontsize=50)
         Button(self.buttons_group, 50, 650, 'back', (300, 50), fontsize=50)
 
-        font = pygame.font.Font(None, 50)
-        text_coord = 50
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -243,15 +250,6 @@ class Game:
                                     elif i == 2:
                                         self.start_screen()
                         self.buttons_group.update()
-
-            for line in rules[page_num]:
-                string_rendered = font.render(line, 1, pygame.Color('black'))
-                intro_rect = string_rendered.get_rect()
-                text_coord += 10
-                intro_rect.top = text_coord
-                intro_rect.x = 10
-                text_coord += intro_rect.height
-                self.screen.blit(string_rendered, intro_rect)
 
             update_screen()
             self.buttons_group.draw(self.screen)
