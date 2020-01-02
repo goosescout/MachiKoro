@@ -1,39 +1,38 @@
 import pygame
 import os
 import sys
-import threading
 import socket
 
-from utility import load_image
-
-
-class MyThread(threading.Thread):
-    def __init__(self, func, *args, **kwargs):
-        super().__init__()
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-
-    def run(self):
-        self.func(*self.args, **self.kwargs)
+from utility import load_image, MyThread
+from node import Node
 
 
 class Notification(pygame.sprite.Sprite):
     def __init__(self, group, text, font='data/DisposableDroidBB.ttf', fontsize=50, color=pygame.Color('black')):
+        group.empty()
         super().__init__(group)
         self.image = pygame.transform.scale(load_image('button.png'), (880, 320))
         self.rect = self.image.get_rect()
         self.rect.x = 200
         self.rect.y = 200
 
-        font = pygame.font.Font(font, fontsize)
+        self.font = pygame.font.Font(font, fontsize)
+        self.color = color
         shift = 280 // (len(text) + 1 )
         for i, line in enumerate(text):
-            line = font.render(line, 1, color)
+            line = self.font.render(line, 1, color)
             self.image.blit(line, (20, shift * (i + 1)))
 
-        Button(group, 910, 450, 'close', size=(150, 50), fontsize=50)
+        self.button = Button(group, 910, 450, 'close', size=(150, 50), fontsize=50)
+
+    def update(self, *args, **kwargs):
+        if 'text' in kwargs.keys():
+            self.image = pygame.transform.scale(load_image('button.png'), (880, 320))
+            shift = 280 // (len(kwargs['text']) + 1 )
+            for i, line in enumerate(kwargs['text']):
+                line = self.font.render(line, 1, self.color)
+                self.image.blit(line, (20, shift * (i + 1)))
+                
 
 
 class Cursor(pygame.sprite.Sprite):
@@ -96,7 +95,7 @@ class Button(pygame.sprite.Sprite):
         else:
             return False
 
-    def update(self):
+    def update(self, *args, **kwargs):
         self.unpress()
 
 
@@ -106,8 +105,9 @@ class Game:
         pygame.mouse.set_visible(False)
         self.WIDTH = 1280
         self.HEIGHT = 720
-        self.FPS = 30
+        self.FPS = 60
         self.clock = pygame.time.Clock()
+        self.node = Node()
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
 
@@ -142,8 +142,10 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
+
                 if event.type == pygame.MOUSEMOTION:
                     self.cursor_group.update()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         for i, button in enumerate(self.buttons_group):
@@ -187,14 +189,15 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
-        searching_for_game = False
-        game_found = [False]
+        flags = {'searching_for_game': False, 'game_found': False}
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
+
                 if event.type == pygame.MOUSEMOTION:
                     self.cursor_group.update()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         for i, button in enumerate(self.buttons_group):
@@ -209,27 +212,11 @@ class Game:
                     if event.button == 1:
                         for i, button in enumerate(self.buttons_group):
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
-                                state = button.unpress()
-                                if state:
+                                if button.unpress():
                                     if i == 0:
-                                        searching_for_game = True
-                                        stop = [False]
-                                        Notification(self.notification_group, ('searching for the game...',))
-
-                                        def search(stop, game_found):
-                                            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                                            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-                                            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
-                                            s.bind(('0.0.0.0', 11719))
-                                            while True:
-                                                message = s.recv(128).decode('utf-8')
-                                                if message.startswith('searching for players'):
-                                                    game_found[0] = True
-                                                    stop[0] = True
-                                                if stop[0]:
-                                                    break
-
-                                        thread = MyThread(search, stop, game_found)
+                                        flags['searching_for_game'] = True
+                                        Notification(self.notification_group, ('searching for the game.',))
+                                        thread = MyThread(self.node.await_recieve, 'searching for players', 'message', (flags, 'game_found'))
                                         thread.start()
                                     elif i == 1:
                                         pass
@@ -241,23 +228,28 @@ class Game:
                                     if elem.unpress():
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
-                                            stop = True
-                                            searching_for_game = False
-                                            game_found = [False]
+                                            thread.kill()
+                                            thread.join()
+                                            flags['searching_for_game'] = False
+                                            flags['game_found'] = False
                         self.buttons_group.update()
 
             update_screen()
             self.buttons_group.draw(self.screen)
+            if flags['searching_for_game']:
+                if counter % 20 == 0:
+                    for elem in self.notification_group:
+                        if isinstance(elem, Notification):
+                            elem.update(text=('searching for the game' + "." * abs(counter % 3 - 3),))
+            if flags['game_found']:
+                if not thread.killed:
+                    thread.kill()
+                flags['searching_for_game'] = False
+                if counter % 20 == 0:
+                    for elem in self.notification_group:
+                        if isinstance(elem, Notification):
+                            elem.update(text=('game is ready', 'connecting' + "." * abs(counter % 3 - 3)))
             self.notification_group.draw(self.screen)
-            if searching_for_game:
-                if counter % 10 == 0:
-                    self.notification_group.empty()
-                    Notification(self.notification_group, ('searching for the game' + "." * (counter % 3 + 1),))
-            if game_found[0]:
-                searching_for_game = False
-                if counter % 10 == 0:
-                    self.notification_group.empty()
-                    Notification(self.notification_group, ('game is ready', 'connecting' + "." * (counter % 3 + 1)))
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
             self.clock.tick(self.FPS)
