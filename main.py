@@ -141,33 +141,36 @@ class Game:
         self.buttons_group.empty()
         page_num = 0
         rules = {
-            0: ['Welcome to the city of Machi Koro, the Japanese card game that is sweeping the world. '
-                'You’ve just been elected Mayor.',
-                'Congratulations! Unfortunately, the citizens have some pretty big demands: jobs, a '
-                'theme park, a couple of cheese',
-                'factories, and maybe even a radio tower. A tough proposition since the city currently '
-                'consists of a wheat field,',
-                'a bakery, and a single die. Armed only with your trusty die and a dream, you must grow '
-                'Machi Koro into the largest',
-                'city in the region. You will need to collect income from developments, build public '
-                'works, and steal from your',
-                'neighbors’ coffers. Just make sure they aren’t doing the same to you! Machi Koro is a fast-paced, '
-                'lighthearted game for',
-                'you and up to 3 friends. Once you’ve had a taste of Machi Koro, this infectiously '
-                'fun game may have you wondering if',
-                'the dinner table ever served another purpose other than gaming. They say you can’t '
-                'build Rome in a day, but Machi Koro',
-                'will be built in less than 30 minutes!'],
-            1: ['Goal', 'The player to construct all four of their Landmarks first wins the game!',
+            0: ['Welcome to the city of Machi Koro, the Japanese card game that is sweeping',
+                'the world. You’ve just been elected Mayor. Congratulations! Unfortunately,',
+                'the citizens have some pretty big demands: jobs, a theme park, a couple of',
+                'cheese factories, and maybe even a radio tower. A tough proposition since',
+                'the city currently consists of a wheat field, a bakery, and a single die.',
+                'Armed only with your trusty die and a dream, you must grow Machi Koro into',
+                'the largest city in the region. You will need to collect income from',
+                'developments, build public works, and steal from your neighbors’ coffers.',
+                'Just make sure they aren’t doing the same to you! Machi Koro is a fast-',
+                'paced, lighthearted game for you and up to 3 friends. Once you’ve had a',
+                'taste of Machi Koro, this infectiously fun game may have you wondering if',
+                'the dinner table ever served another purpose other than gaming. They say',
+                'you can’t build Rome in a day, but Machi Koro will be built in less than',
+                '30 minutes!'],
+            1: ['Goal',
+                'The player to construct all four of their Landmarks first wins the game!',
                 'Game Components',
-                '108 Cards (84 Supply Establishments, 8 Starting Establishments, 16 Landmarks)',
-                '72 Coins (worth 210)', '2 Dice',
+                '108 Cards(84 Supply Establishments, 8 Starting Establishments, 16 Landmarks)',
+                '72 Coins(worth 210)',
+                '2 Dice',
                 'Game Flow',
-                'Players take turns in clockwise order. A turn consists of the following three phases:',
-                '* Roll Dice', '* Earn Income', '* Construction', 'Earn Income',
-                'Players earn income based on the dice roll and the effects of the Establishments that '
-                'they own that match the dice roll.'],
-            2: ['				Types of income',
+                'Players take turns in clockwise order.',
+                'A turn consists of the following three phases:',
+                '* Roll Dice',
+                '* Earn Income',
+                '* Construction',
+                'Earn Income',
+                'Players earn income based on the dice roll and the effects of the',
+                'Establishments that they own that match the dice roll.'],
+            2: ['Types of income',
                 'Blue: Primary Industry',
                 'Get income from the bank, during anyone’s turn.',
                 'Red: Restaurants',
@@ -176,31 +179,27 @@ class Game:
                 'Get income from the bank, during your turn only.',
                 'Purple: Major Establishments',
                 'Get income from all other players, but during your turn only.'],
-            3: ['				Order of activation',
-                'It is possible that multiple types of Establishments are activated by the same '
-                'die roll, in this case the',
-                'Establishments are activated in the following order:',
+            3: ['Order of activation',
+                'It is possible that multiple types of Establishments are activated by the',
+                'same die roll, in this case the Establishments are activated in the',
+                'following order:',
                 '1. Restaurants (Red)',
                 '2. Secondary Industry (Green) and Primary Industry (Blue)',
                 '3. Major Establishments (Purple)',
-                'If a player owns multiple copies of a single Establishment, the effects '
-                'are multiplied by the number of',
-                'Establishments of that type owned.',
-                'Players may not construct more than one of each of the purple Establishments '
-                'in their town. A player may construct as',
-                'many unique cards as they choose, but may never construct a second of the same purple card.',
-                'If a player owes another player money and cannot afford to pay it, they pay what '
-                'they can and the rest is exempted',
-                '(a player’s coin total can never go below zero), the receiving player is not '
-                'compensated for the lost income.',
-                'If payment is owed to multiple players at the same time, payment is processed '
-                'in reverse player order (counter clockwise).',
-                ],
+                'If a player owns multiple copies of a single Establishment, the effects are',
+                'multiplied by the number of Establishments of that type owned. Players may',
+                'not construct more than one of each of the purple Establishments in their town.',
+                'A player may construct as many unique cards as they choose, but may never',
+                'construct a second of the same purple card. If a player owes another player',
+                'money and cannot afford to pay it, they pay what they can and the rest is',
+                'exempted (a player’s coin total can never go below zero), the receiving player',
+                'is not compensated for the lost income. If payment is owed to multiple players',
+                'at the same time, payment is processed in reverse player order (counter clockwise).'],
             4: ['Building New Establishments and Completing Landmarks',
-                'To conclude a player’s turn, he or she may pay to construct one single '
-                'Establishment OR pay to finish construction on',
-                'a single Landmark by paying the cost shown on the lower left-hand corner of the card.',
-                'Once constructed, an Establishment is taken from the supply and added to the player’s play area.']
+                'To conclude a player’s turn, he or she may pay to construct one single',
+                'Establishment OR pay to finish construction on a single Landmark by paying',
+                'the cost shown on the lower left-hand corner of the card. Once constructed,',
+                'an Establishment is taken from the supply and added to the player’s play area.']
         }
 
         def update_screen():
@@ -208,6 +207,18 @@ class Game:
                 'background.jfif'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
 
+            back_image = pygame.transform.scale(load_image('button.png'), (1260, 730))
+            self.screen.blit(back_image, (10, -20))
+            font = pygame.font.Font(None, 45)
+            text_coord = 10
+            for line in rules[page_num]:
+                string_rendered = font.render(line, 1, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                text_coord += 7
+                intro_rect.top = text_coord
+                intro_rect.x = 25
+                text_coord += intro_rect.height
+                self.screen.blit(string_rendered, intro_rect)
 
         update_screen()
 
@@ -215,8 +226,6 @@ class Game:
         Button(self.buttons_group, 540, 650, 'prev', (300, 50), fontsize=50)
         Button(self.buttons_group, 50, 650, 'back', (300, 50), fontsize=50)
 
-        font = pygame.font.Font(None, 50)
-        text_coord = 50
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -243,15 +252,6 @@ class Game:
                                     elif i == 2:
                                         self.start_screen()
                         self.buttons_group.update()
-
-            for line in rules[page_num]:
-                string_rendered = font.render(line, 1, pygame.Color('black'))
-                intro_rect = string_rendered.get_rect()
-                text_coord += 10
-                intro_rect.top = text_coord
-                intro_rect.x = 10
-                text_coord += intro_rect.height
-                self.screen.blit(string_rendered, intro_rect)
 
             update_screen()
             self.buttons_group.draw(self.screen)
