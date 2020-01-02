@@ -199,7 +199,7 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
-        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': None}
+        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': None, 'game_connected': False}
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -231,7 +231,6 @@ class Game:
                                     elif i == 1:
                                         Notification(self.notification_group, ('searching for players (1/4).', self.node.ip), add_button='start')
                                         flags['searching_for_players'] = True
-                                        self.node.send('searching for the game')
                                         thread = MyThread(self.node.await_recieve, 'connect', 'message', [[flags, 'players', '__VALUE__']], 4)
                                         thread.start()
                                     elif i == 2:
@@ -269,12 +268,16 @@ class Game:
                         if isinstance(elem, Notification):
                             elem.update(text=('searching for the game' + "." * abs(counter % 3 - 3),))
             if flags['game_found']:
-                flags['searching_for_game'] = False
+                if not flags['game_connected']:
+                    flags['searching_for_game'] = False
+                    flags['game_connected'] = True
+                    self.node.send('connect', flags['game_host']['ip'])
                 if counter % 20 == 0:
                     for elem in self.notification_group:
                         if isinstance(elem, Notification):
                             elem.update(text=('game is ready', 'connecting' + "." * abs(counter % 3 - 3)))
             if flags['searching_for_players']:
+                self.node.send('searching for players')
                 players = [elem['ip'] for elem in flags['players']]
                 if counter % 20 == 0:
                     for elem in self.notification_group:
