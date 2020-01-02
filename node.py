@@ -8,14 +8,17 @@ class Node:
         self.ip = socket.gethostbyname(socket.gethostname())
         self.port = port
         
-    def send(self, data, ip=None):
+    def send(self, data, ip=None, **kwargs):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
+        message = {'ip': self.ip, 'message': data}
+        for key, value in kwargs.items():
+            message[key] = value
         if ip is None:
             for i in range(256):
-                sock.sendto(bytes(str(data), encode='utf-8'), (f'192.168.1.{i}', self.port))
+                sock.sendto(bytes(str(message), encoding='utf-8'), (f'192.168.1.{i}', self.port))
         else:
-            sock.sendto(bytes(str(data), encode='utf-8'), (ip, self.port))
+            sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
 
     def recieve(self, var):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -27,7 +30,7 @@ class Node:
         var = eval(message.decode('utf-8'))
         return eval(message.decode('utf-8'))
 
-    def await_recieve(self, data, match=None, flag=None):
+    def await_recieve(self, data, match=None, flag=None, stop=True):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
@@ -38,10 +41,24 @@ class Node:
             if match is None:
                 if eval(message.decode('utf-8')) == data:
                     if flag is not None:
-                        flag[0][flag[1]] = True
-                    return eval(message.decode('utf-8'))
+                        for elem in flag:
+                            if elem[2] == '__VALUE__':
+                                elem[2] = eval(message.decode('utf-8'))
+                            if isinstance(elem[0][elem[1]], list):
+                                elem[0][elem[1]].append(elem[2])
+                            else:
+                                elem[0][elem[1]] = elem[2]
+                    if stop:
+                        return eval(message.decode('utf-8'))
             else:
-                if eval(message.decode('utf-8'))[match] == data:
+                if data in eval(message.decode('utf-8'))[match]:
                     if flag is not None:
-                        flag[0][flag[1]] = True
-                    return eval(message.decode('utf-8'))
+                        for elem in flag:
+                            if elem[2] == '__VALUE__':
+                                elem[2] = eval(message.decode('utf-8'))
+                            if isinstance(elem[0][elem[1]], list):
+                                elem[0][elem[1]].append(elem[2])
+                            else:
+                                elem[0][elem[1]] = elem[2]
+                    if stop:
+                        return eval(message.decode('utf-8'))
