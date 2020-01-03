@@ -36,7 +36,6 @@ class Notification(pygame.sprite.Sprite):
                 self.image.blit(line, (20, shift * (i + 1)))
                 
 
-
 class Cursor(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -225,13 +224,16 @@ class Game:
                                 if button.unpress():
                                     if i == 0:
                                         flags['searching_for_game'] = True
+                                        flags['game_found'] = False
+                                        flags['game_connected'] = False
+                                        #flags['game_closed'] = False
                                         Notification(self.notification_group, ('searching for the game.',))
-                                        thread = MyThread(self.node.await_recieve, 'searching for players', 'message', [[flags, 'game_found', True], [flags, 'game_host', '__VALUE__']])
+                                        thread = MyThread(self.node.await_recieve, ['searching for players', 'message', [[flags, 'game_found', True], [flags, 'game_host', '__VALUE__'], [flags, 'searching_for_game', False]], 1])
                                         thread.start()
                                     elif i == 1:
                                         Notification(self.notification_group, ('searching for players (1/4).', self.node.ip), add_button='start')
                                         flags['searching_for_players'] = True
-                                        thread = MyThread(self.node.await_recieve, 'connect', 'message', [[flags, 'players', '__VALUE__']], 4)
+                                        thread = MyThread(self.node.await_recieve, ['connect', 'message', [[flags, 'players', '__VALUE__']], -1], ['disconnect', 'message', [[flags, 'players', '__VALUE_DEL__']], -1])
                                         thread.start()
                                     elif i == 2:
                                         self.notification_group.empty()
@@ -243,10 +245,15 @@ class Game:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
                                             # thread.kill()
+                                            if flags['game_found']:
+                                                self.node.send('disconnect', flags['game_host']['ip'])
+                                            if flags['searching_for_players']:
+                                                self.node.send('search stopped')
                                             flags['searching_for_game'] = False
                                             flags['game_found'] = False
                                             flags['searching_for_players'] = False
                                             flags['players'] = [{'ip': self.node.ip}]
+                                            flags['game_host'] = {'ip': -1}
                                     elif i == 2:
                                         players = [elem['ip'] for elem in flags['players']]
                                         if len(players) > 1:
@@ -269,13 +276,16 @@ class Game:
                             elem.update(text=('searching for the game' + "." * abs(counter % 3 - 3),))
             if flags['game_found']:
                 if not flags['game_connected']:
-                    flags['searching_for_game'] = False
                     flags['game_connected'] = True
                     self.node.send('connect', flags['game_host']['ip'])
+                    #thread2 = MyThread(self.node.await_recieve(['search stopped', 'message', [[flags, 'game_host', {'ip': -1}], [flags, 'game_found', False], [flags, 'searching_for_game', False], [flags, 'game_connected', False], [flags, 'game_closed', True]], 1]))
+                    #thread2.start()
                 if counter % 20 == 0:
                     for elem in self.notification_group:
                         if isinstance(elem, Notification):
-                            elem.update(text=('game is ready', 'connecting' + "." * abs(counter % 3 - 3)))
+                            elem.update(text=('game is ready', f"game host: {flags['game_host']['ip']}", 'connecting' + "." * abs(counter % 3 - 3)))
+            #if flags['game_closed']:
+                #Notification(self.notification_group, 'game was closed')
             if flags['searching_for_players']:
                 self.node.send('searching for players')
                 players = [elem['ip'] for elem in flags['players']]
