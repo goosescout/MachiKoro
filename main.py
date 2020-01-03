@@ -95,7 +95,7 @@ class Game:
 
         def update_screen():
             background = pygame.transform.scale(load_image(
-                'background_test.png'), (self.WIDTH, self.HEIGHT))
+                'background.jfif'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
             logo = pygame.transform.scale(load_image('logo.png'), (880, 200))
             self.screen.blit(logo, (200, 50))
@@ -217,6 +217,14 @@ class Game:
                 text_coord += 7
                 intro_rect.top = text_coord
                 intro_rect.x = 25
+            font = pygame.font.Font(None, 50)
+            text_coord = 50
+            for line in rules[page_num]:
+                string_rendered = font.render(line, 1, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                text_coord += 10
+                intro_rect.top = text_coord
+                intro_rect.x = 10
                 text_coord += intro_rect.height
                 self.screen.blit(string_rendered, intro_rect)
 
