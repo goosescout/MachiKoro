@@ -8,7 +8,8 @@ from node import Node
 
 
 class Notification(pygame.sprite.Sprite):
-    def __init__(self, group, text, font='data/DisposableDroidBB.ttf', fontsize=50, color=pygame.Color('black'), add_button=None):
+    def __init__(self, group, text, font='data/DisposableDroidBB.ttf', fontsize=50, color=pygame.Color('black'),
+                 add_button=None):
         group.empty()
         super().__init__(group)
         self.image = pygame.transform.scale(load_image('button.png'), (880, 320))
@@ -18,7 +19,7 @@ class Notification(pygame.sprite.Sprite):
 
         self.font = pygame.font.Font(font, fontsize)
         self.color = color
-        shift = 280 // (len(text) + 1 )
+        shift = 280 // (len(text) + 1)
         for i, line in enumerate(text):
             line = self.font.render(line, 1, color)
             self.image.blit(line, (20, shift * (i + 1)))
@@ -30,11 +31,11 @@ class Notification(pygame.sprite.Sprite):
     def update(self, *args, **kwargs):
         if 'text' in kwargs.keys():
             self.image = pygame.transform.scale(load_image('button.png'), (880, 320))
-            shift = 280 // (len(kwargs['text']) + 1 )
+            shift = 280 // (len(kwargs['text']) + 1)
             for i, line in enumerate(kwargs['text']):
                 line = self.font.render(line, 1, self.color)
                 self.image.blit(line, (20, shift * (i + 1)))
-                
+
 
 class Cursor(pygame.sprite.Sprite):
     def __init__(self, group):
@@ -49,7 +50,8 @@ class Cursor(pygame.sprite.Sprite):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, x, y, text, size=None, font='data/DisposableDroidBB.ttf', fontsize=100, color=pygame.Color('black')):
+    def __init__(self, group, x, y, text, size=None, font='data/DisposableDroidBB.ttf', fontsize=100,
+                 color=pygame.Color('black')):
         super().__init__(group)
         self.group = group
         self.size = size
@@ -198,7 +200,9 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
-        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': {'ip': -1}, 'game_connected': False, 'game_closed': False}
+        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False,
+                 'players': [{'ip': self.node.ip}], 'game_host': {'ip': -1}, 'game_connected': False,
+                 'game_closed': False}
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -227,13 +231,23 @@ class Game:
                                         flags['game_found'] = False
                                         flags['game_connected'] = False
                                         flags['game_closed'] = False
-                                        notification = Notification(self.notification_group, ('searching for the game.',))
-                                        thread = MyThread(self.node.await_recieve, ['searching for players', 'message', [[flags, 'game_found', True], [flags, 'game_host', '__VALUE__'], [flags, 'searching_for_game', False]], 1])
+                                        notification = Notification(self.notification_group,
+                                                                    ('searching for the game.',))
+                                        thread = MyThread(self.node.await_recieve, ['searching for players', 'message',
+                                                                                    [[flags, 'game_found', True],
+                                                                                     [flags, 'game_host', '__VALUE__'],
+                                                                                     [flags, 'searching_for_game',
+                                                                                      False]], 1])
                                         thread.start()
                                     elif i == 1:
-                                        notification = Notification(self.notification_group, ('searching for players (1/4).', self.node.ip), add_button='start')
+                                        notification = Notification(self.notification_group,
+                                                                    ('searching for players (1/4).', self.node.ip),
+                                                                    add_button='start')
                                         flags['searching_for_players'] = True
-                                        thread = MyThread(self.node.await_recieve, ['connect', 'message', [[flags, 'players', '__VALUE__']], -1], ['disconnect', 'message', [[flags, 'players', '__VALUE_DEL__']], -1])
+                                        thread = MyThread(self.node.await_recieve,
+                                                          ['connect', 'message', [[flags, 'players', '__VALUE__']], -1],
+                                                          ['disconnect', 'message',
+                                                           [[flags, 'players', '__VALUE_DEL__']], -1])
                                         thread.start()
                                     elif i == 2:
                                         self.notification_group.empty()
@@ -281,10 +295,16 @@ class Game:
                         self.stop_threads()
                     flags['game_connected'] = True
                     self.node.send('connect', flags['game_host']['ip'])
-                    thread = MyThread(self.node.await_recieve, ['search stopped', 'message', [[flags, 'game_host', {'ip': -1}], [flags, 'game_found', False], [flags, 'searching_for_game', False], [flags, 'game_connected', False], [flags, 'game_closed', True]], 1])
+                    thread = MyThread(self.node.await_recieve, ['search stopped', 'message',
+                                                                [[flags, 'game_host', {'ip': -1}],
+                                                                 [flags, 'game_found', False],
+                                                                 [flags, 'searching_for_game', False],
+                                                                 [flags, 'game_connected', False],
+                                                                 [flags, 'game_closed', True]], 1])
                     thread.start()
                 if counter % 20 == 0:
-                    notification.update(text=('game is ready', f"game host: {flags['game_host']['ip']}", 'connecting' + "." * abs(counter % 3 - 3)))
+                    notification.update(text=('game is ready', f"game host: {flags['game_host']['ip']}",
+                                              'connecting' + "." * abs(counter % 3 - 3)))
             if flags['game_closed']:
                 notification.update(text=('host has left the game', 'please restart search'))
                 if thread.is_alive():
@@ -293,7 +313,8 @@ class Game:
                 self.node.send('searching for players')
                 players = [elem['ip'] for elem in flags['players']]
                 if counter % 20 == 0:
-                    notification.update(text=[f'searching for players ({len(players)}/4)' + "." * abs(counter % 3 - 3)] + players)
+                    notification.update(
+                        text=[f'searching for players ({len(players)}/4)' + "." * abs(counter % 3 - 3)] + players)
                 if len(players) == 4:
                     flags['searching_for_players'] = False
                     print('start game')
@@ -376,9 +397,9 @@ class Game:
             self.screen.blit(background, (0, 0))
 
             back_image = pygame.transform.scale(load_image('button.png'), (1260, 550))
-            self.screen.blit(back_image, (10, -20))
+            self.screen.blit(back_image, (10, 50))
             font = pygame.font.Font('data/DisposableDroidBB.ttf', 35)
-            text_coord = -20
+            text_coord = 50
             for line in rules[page_num]:
                 string_rendered = font.render(line, 1, pygame.Color('black'))
                 intro_rect = string_rendered.get_rect()
@@ -386,24 +407,12 @@ class Game:
                 intro_rect.top = text_coord
                 intro_rect.x = 25
                 self.screen.blit(string_rendered, intro_rect)
-            '''
-            font = pygame.font.Font(None, 50)
-            text_coord = 50
-            for line in rules[page_num]:
-                string_rendered = font.render(line, 1, pygame.Color('black'))
-                intro_rect = string_rendered.get_rect()
-                text_coord += 10
-                intro_rect.top = text_coord
-                intro_rect.x = 10
-                text_coord += intro_rect.height
-            '''
-
-
+            
         update_screen()
 
         Button(self.buttons_group, 940, 650, 'next', (300, 50), fontsize=50)
         Button(self.buttons_group, 540, 650, 'prev', (300, 50), fontsize=50)
-        Button(self.buttons_group, 50, 650, 'back', (300, 50), fontsize=50)
+        Button(self.buttons_group, 20, 650, 'back', (150, 50), fontsize=50)
 
         while True:
             for event in pygame.event.get():
