@@ -136,9 +136,9 @@ class Game:
 
         def update_screen():
             background = pygame.transform.scale(load_image(
-                'background.jfif'), (self.WIDTH, self.HEIGHT))
+                'background_test.jpg'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-            logo = pygame.transform.scale(load_image('logo.png'), (880, 200))
+            logo = load_image('logo_test.jpg', -1)
             self.screen.blit(logo, (200, 50))
 
         update_screen()
@@ -186,9 +186,9 @@ class Game:
 
         def update_screen():
             background = pygame.transform.scale(load_image(
-                'background.jfif'), (self.WIDTH, self.HEIGHT))
+                'background_test.jpg'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-            logo = pygame.transform.scale(load_image('logo.png'), (880, 200))
+            logo = load_image('logo_test.jpg', -1)
             self.screen.blit(logo, (200, 50))
 
         update_screen()
@@ -361,8 +361,8 @@ class Game:
                 'construct a second of the same purple card. If a player owes another player',
                 'money and cannot afford to pay it, they pay what they can and the rest is',
                 'exempted (a player’s coin total can never go below zero), the receiving player',
-                'is not compensated for the lost income. If payment is owed to multiple players',
-                'at the same time, payment is processed in reverse player order (counter clockwise).'],
+                'is not compensated for the lost income. If payment is owed to multiple players at',
+                'the same time, payment is processed in reverse player order (counter clockwise).'],
             4: ['Building New Establishments and Completing Landmarks',
                 'To conclude a player’s turn, he or she may pay to construct one single',
                 'Establishment OR pay to finish construction on a single Landmark by paying',
@@ -372,19 +372,21 @@ class Game:
 
         def update_screen():
             background = pygame.transform.scale(load_image(
-                'background.jfif'), (self.WIDTH, self.HEIGHT))
+                'background_test.jpg'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
 
-            back_image = pygame.transform.scale(load_image('button.png'), (1260, 730))
+            back_image = pygame.transform.scale(load_image('button.png'), (1260, 550))
             self.screen.blit(back_image, (10, -20))
-            font = pygame.font.Font(None, 45)
-            text_coord = 10
+            font = pygame.font.Font('data/DisposableDroidBB.ttf', 35)
+            text_coord = -20
             for line in rules[page_num]:
                 string_rendered = font.render(line, 1, pygame.Color('black'))
                 intro_rect = string_rendered.get_rect()
-                text_coord += 7
+                text_coord += 30
                 intro_rect.top = text_coord
                 intro_rect.x = 25
+                self.screen.blit(string_rendered, intro_rect)
+            '''
             font = pygame.font.Font(None, 50)
             text_coord = 50
             for line in rules[page_num]:
@@ -394,7 +396,8 @@ class Game:
                 intro_rect.top = text_coord
                 intro_rect.x = 10
                 text_coord += intro_rect.height
-                self.screen.blit(string_rendered, intro_rect)
+            '''
+
 
         update_screen()
 
