@@ -198,7 +198,7 @@ class Game:
         Button(self.buttons_group, 20, 650, 'back', size=(150, 50), fontsize=50)
 
         counter = 0
-        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': {'ip': -1}, 'game_connected': False}
+        flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False, 'players': [{'ip': self.node.ip}], 'game_host': {'ip': -1}, 'game_connected': False, 'game_closed': False}
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -226,7 +226,7 @@ class Game:
                                         flags['searching_for_game'] = True
                                         flags['game_found'] = False
                                         flags['game_connected'] = False
-                                        #flags['game_closed'] = False
+                                        flags['game_closed'] = False
                                         Notification(self.notification_group, ('searching for the game.',))
                                         thread = MyThread(self.node.await_recieve, ['searching for players', 'message', [[flags, 'game_found', True], [flags, 'game_host', '__VALUE__'], [flags, 'searching_for_game', False]], 1])
                                         thread.start()
@@ -244,7 +244,6 @@ class Game:
                                     if i == 1:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
-                                            # thread.kill()
                                             if flags['game_found']:
                                                 self.node.send('disconnect', flags['game_host']['ip'])
                                             if flags['searching_for_players']:
@@ -254,10 +253,13 @@ class Game:
                                             flags['searching_for_players'] = False
                                             flags['players'] = [{'ip': self.node.ip}]
                                             flags['game_host'] = {'ip': -1}
+                                            if thread.is_alive():
+                                                self.stop_threads()
+
                                     elif i == 2:
                                         players = [elem['ip'] for elem in flags['players']]
                                         if len(players) > 1:
-                                            # thread.kill()
+                                            self.stop_threads()
                                             print('start game')
                         self.buttons_group.update()
 
@@ -276,17 +278,23 @@ class Game:
                             elem.update(text=('searching for the game' + "." * abs(counter % 3 - 3),))
             if flags['game_found']:
                 if not flags['game_connected']:
+                    self.stop_threads()
                     flags['game_connected'] = True
                     self.node.send('connect', flags['game_host']['ip'])
-                    #thread2 = MyThread(self.node.await_recieve(['search stopped', 'message', [[flags, 'game_host', {'ip': -1}], [flags, 'game_found', False], [flags, 'searching_for_game', False], [flags, 'game_connected', False], [flags, 'game_closed', True]], 1]))
-                    #thread2.start()
+                    thread = MyThread(self.node.await_recieve, ['search stopped', 'message', [[flags, 'game_host', {'ip': -1}], [flags, 'game_found', False], [flags, 'searching_for_game', False], [flags, 'game_connected', False], [flags, 'game_closed', True]], 1])
+                    thread.start()
                 if counter % 20 == 0:
                     for elem in self.notification_group:
                         if isinstance(elem, Notification):
                             elem.update(text=('game is ready', f"game host: {flags['game_host']['ip']}", 'connecting' + "." * abs(counter % 3 - 3)))
-            #if flags['game_closed']:
-                #Notification(self.notification_group, 'game was closed')
+            if flags['game_closed']:
+                for elem in self.notification_group:
+                    if isinstance(elem, Notification):
+                        elem.update(text=('host has left the game', 'please restart search'))
+                if thread.is_alive():
+                    self.stop_threads()
             if flags['searching_for_players']:
+                print(thread.is_alive())
                 self.node.send('searching for players')
                 players = [elem['ip'] for elem in flags['players']]
                 if counter % 20 == 0:
@@ -306,6 +314,9 @@ class Game:
 
     def game_screen(self):
         pass
+
+    def stop_threads(self):
+        self.node.send('exit', self.node.ip)
 
 
 def main():

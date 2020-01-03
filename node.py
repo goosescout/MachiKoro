@@ -63,6 +63,8 @@ class Node:
         while True:
             s = sock.recv(128)
             message = eval(s.decode('utf-8'))
+            if message['message'] == 'exit':
+                return
             for i, (data, match, flag, stop_count, stop) in enumerate(zip(datas, matches, flags, stop_counts, stops)):
                 if data == message[match]:
                     if stop != stop_count:
@@ -79,10 +81,8 @@ class Node:
                             elif elem[2] == '__VALUE_DEL__':
                                 if isinstance(elem[0][elem[1]], list):
                                     for inner_elem in elem[0][elem[1]]:
-                                        if inner_elem['ip'] == message['ip']:
-                                            print(elem[0][elem[1]])
+                                        if inner_elem[match] in message[match]:
                                             elem[0][elem[1]].remove(inner_elem)
-                                            print(elem[0][elem[1]])
                                             break
                             else:
                                 if isinstance(elem[0][elem[1]], list):
@@ -93,32 +93,3 @@ class Node:
                     break
             else:
                 return
-
-            '''
-            if match is None:
-                if eval(message.decode('utf-8')) == data:
-                    if flag is not None:
-                        for elem in flag:
-                            if elem[2] == '__VALUE__':
-                                elem[2] = eval(message.decode('utf-8'))
-                            if isinstance(elem[0][elem[1]], list):
-                                elem[0][elem[1]].append(elem[2])
-                            else:
-                                elem[0][elem[1]] = elem[2]
-                    stop += 1
-                    if stop == stop_count:
-                        return eval(message.decode('utf-8'))
-            else:
-                if data in eval(message.decode('utf-8'))[match]:
-                    if flag is not None:
-                        for elem in flag:
-                            if elem[2] == '__VALUE__':
-                                elem[2] = eval(message.decode('utf-8'))
-                            if isinstance(elem[0][elem[1]], list):
-                                elem[0][elem[1]].append(elem[2])
-                            else:
-                                elem[0][elem[1]] = elem[2]
-                    stop += 1
-                    if stop == stop_count:
-                        return eval(message.decode('utf-8'))
-            '''
