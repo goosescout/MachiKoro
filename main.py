@@ -95,7 +95,7 @@ class Game:
 
         def update_screen():
             background = pygame.transform.scale(load_image(
-                'background.jfif'), (self.WIDTH, self.HEIGHT))
+                'background_test.png'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
             logo = pygame.transform.scale(load_image('logo.png'), (880, 200))
             self.screen.blit(logo, (200, 50))
