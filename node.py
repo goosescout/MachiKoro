@@ -1,6 +1,6 @@
 import socket
 
-from utility import MyThread
+from utility import MyThread, Player
 
 
 class Node:
@@ -9,6 +9,11 @@ class Node:
         self.port = port
         
     def send(self, data, ip=None, **kwargs):
+        '''
+        Send a message to a given ip.
+        If ip is not provided (or None) sends a message to all ip adresses in range from 192.168.1.0 to 192.168.1.255
+        Message is a dictionary, which holds a sender's ip, a message, and any other passed arguments.
+        '''
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
         message = {'ip': self.ip, 'message': data}
@@ -21,18 +26,18 @@ class Node:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
 
     def recieve(self):
-    # Awaits for any one message.
+        '''
+        Awaits for any one message and returns it.
+        '''
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
         sock.bind(('0.0.0.0', self.port))
 
-        s = sock.recv(128)
+        s = sock.recv(4096)
         message = eval(s.decode('utf-8'))
-        #var = eval(message.decode('utf-8'))
         return message
 
-    #def await_recieve(self, data, match=None, flag=None, stop_count=1):
     def await_recieve(self, *args):
         '''
         Awaits for a particular message.
@@ -61,8 +66,13 @@ class Node:
         stops = [0] * len(stop_counts)
 
         while True:
-            s = sock.recv(128)
+            s = sock.recv(4096)
             message = eval(s.decode('utf-8'))
+            for key in message.keys():
+                try:
+                    message[key] = eval(message[key])
+                except Exception:
+                    pass
             if message['message'] == 'exit':
                 return
             for i, (data, match, flag, stop_count, stop) in enumerate(zip(datas, matches, flags, stop_counts, stops)):
