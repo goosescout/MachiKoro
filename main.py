@@ -58,6 +58,47 @@ class CardSprite(pygame.sprite.Sprite):
         self.card = card
 
 
+class PlayerIcon(pygame.sprite.Sprite):
+    def __init__(self, group, is_active, is_myself, player, count, font='data/DisposableDroidBB.ttf'):
+        self.player = player
+        self.is_myself = is_myself
+        super().__init__(group)
+
+        self.image = pygame.transform.scale(load_image('button_press.png'), (
+            375, 125)) if is_active else pygame.transform.scale(load_image('button.png'), (375, 125))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 125 * count
+
+        self.image.blit(load_image('coin.png'), (20, 65))
+        self.image.blit(load_image('landmark.png'), (160, 65))
+
+        self.font = pygame.font.Font(font, 50)
+        line = self.font.render(f': {self.player.get_money()}', 1, pygame.Color('black'))
+        self.image.blit(line, (75, 65))
+        line = self.font.render(f': {len(self.player.get_landmarks())}', 1, pygame.Color('black'))
+        self.image.blit(line, (215, 65))
+        line = self.font.render(self.player.get_ip() if not self.is_myself else 'me', 1, pygame.Color('black'))
+        self.image.blit(line, (5, 5))
+
+    def update(self, is_active, count=None):
+        self.image = pygame.transform.scale(load_image('button_press.png'), (
+            375, 125)) if is_active else pygame.transform.scale(load_image('button.png'), (375, 125))
+
+        if count is not None:
+            self.rect.y = 125 * count
+
+        self.image.blit(load_image('coin.png', -1), (20, 65))
+        self.image.blit(load_image('landmark.png', -1), (160, 65))
+
+        line = self.font.render(f': {self.player.get_money()}', 1, pygame.Color('black'))
+        self.image.blit(line, (75, 65))
+        line = self.font.render(f': {len(self.player.get_landmarks())}', 1, pygame.Color('black'))
+        self.image.blit(line, (215, 65))
+        line = self.font.render(self.player.get_ip() if not self.is_myself else 'me', 1, pygame.Color('black'))
+        self.image.blit(line, (5, 5))
+
 class Cursor(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -489,7 +530,7 @@ class Game:
                         for player in players:
                             if player.get_ip() != self.node.ip:
                                 self.node.send('start game', player,
-                                            players=list(map(str, self.players)))
+                                               players=list(map(str, self.players)))
                         return self.game_screen
             if flags['game_started']['text']:
                 self.players = list(
@@ -507,13 +548,13 @@ class Game:
     def game_screen(self):
         self.buttons_group.empty()
         self.notification_group.empty()
-
-        a = threading.enumerate()
-        print(a)
-        del a
+        self.players_icon_group = pygame.sprite.Group()
 
         myself = list(filter(lambda x: x.get_ip() ==
                              self.node.ip, self.players))[0]
+
+        for i, player in enumerate(self.players):
+            PlayerIcon(self.players_icon_group, i == 0, myself == player, player, i)
 
         def update_screen():
             background = pygame.transform.scale(load_image(
@@ -538,8 +579,7 @@ class Game:
                 end_turn.kill()
                 end_turn = None
             elif cur_player == myself and end_turn is None:
-                end_turn = Button(self.buttons_group, 1060,
-                                  650, 'end turn', (200, 50), fontsize=50)
+                end_turn = Button(self.buttons_group, 1060, 650, 'end turn', (200, 50), fontsize=50)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -586,14 +626,21 @@ class Game:
                                 cur_turn += 1
                             del self.players[i]
                             break
-                    if  len(self.players) == 1:
+                    if len(self.players) == 1:
                         return self.start_screen
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
                     self.node.recieve, 'reciever', latest_message, 'message')
                 listener_thread.start()
 
+            i = 0
+            for elem in self.players_icon_group:
+                if elem.player in self.players:
+                    elem.update(cur_player == elem.player, i)
+                    i += 1
+
             update_screen()
+            self.players_icon_group.draw(self.screen)
             self.buttons_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)

@@ -19,7 +19,6 @@ class Node:
         message = {'ip': self.ip, 'text': data}
         for key, value in kwargs.items():
             message[key] = value
-        print(message, 'ip:', ip)
         if ip is None:
             for i in range(256):
                 sock.sendto(bytes(str(message), encoding='utf-8'), (f'192.168.1.{i}', self.port))
@@ -46,7 +45,6 @@ class Node:
             var[key].append(message)
         else:
             var[key] = message
-        print('___', message)
         return message
 
     def await_recieve(self, *args):
@@ -79,7 +77,6 @@ class Node:
         while True:
             s = sock.recv(4096)
             message = eval(s.decode('utf-8'))
-            print(message)
             for key in message.keys():
                 try:
                     message[key] = eval(message[key])

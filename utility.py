@@ -28,7 +28,7 @@ class Player:
                       'cup': [],
                       'major': []
                       }
-        self.landmarks = []
+        self.landmarks = ['Something']
         self.money = 3
 
     def is_host(self):
