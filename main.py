@@ -561,11 +561,11 @@ class Game:
                                 if button.unpress():
                                     if button == exit_btn:
                                         self.stop_threads()
-                                        self.players = []
                                         for player in self.players:
                                             if player.get_ip() != self.node.ip:
                                                 self.node.send(
                                                     'exit game', player.get_ip())
+                                        self.players = []
                                         return self.start_screen
                                     elif button == end_turn:
                                         for player in self.players:
@@ -580,11 +580,14 @@ class Game:
                 if message['text'] == 'end turn':
                     cur_turn += 1
                 elif message['text'] == 'exit game':
-                    for player in self.players:
+                    for i, player in enumerate(self.players):
                         if player.get_ip() == message['ip']:
                             if cur_player == player:
                                 cur_turn += 1
-                            del player
+                            del self.players[i]
+                            break
+                    if  len(self.players) == 1:
+                        return self.start_screen
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
                     self.node.recieve, 'reciever', latest_message, 'message')
