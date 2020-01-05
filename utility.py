@@ -6,42 +6,49 @@ import trace
 
 
 class MyThread(threading.Thread):
-    def __init__(self, func, *args, **kwargs):
-        super().__init__()
+    def __init__(self, func, name, *args, **kwargs):
+        super().__init__(name=name)
         self.func = func
         self.args = args
         self.kwargs = kwargs
         self.killed = False  
         self.flag = False 
-    '''
-    def start(self): 
-        self.__run_backup = self.run 
-        self.run = self.__run       
-        threading.Thread.start(self) 
-    
-    def __run(self): 
-        sys.settrace(self.globaltrace) 
-        self.__run_backup() 
-        self.run = self.__run_backup
-        self.func(*self.args, **self.kwargs)
-    
-    def globaltrace(self, frame, event, arg): 
-        if event == 'call': 
-            return self.localtrace 
-        else: 
-            return None
-    
-    def localtrace(self, frame, event, arg): 
-        if self.killed: 
-            if event == 'line': 
-                raise SystemExit() 
-        return self.localtrace
-    
-    def kill(self): 
-        self.killed = True
-    '''
+
     def run(self):
         self.func(*self.args, **self.kwargs)
+
+
+class Player:
+    def __init__(self, ip, host=False):
+        self.ip = ip
+        self.host = host
+
+        self.cards = {'wheat': [], 'cow': [], 'gear': [], 'boat': [],  # add wheat field
+                      'bread': [], 'factory': [], 'fruit': [],  # add bakery
+                      'cup': [],
+                      'major': []
+                      }
+        self.landmarks = ['Something']
+        self.money = 3
+
+    def is_host(self):
+        return self.host
+
+    def get_ip(self):
+        return self.ip
+
+    def get_cards(self):
+        return self.cards
+
+    def get_landmarks(self):
+        return self.landmarks
+
+    def get_money(self):
+        return self.money
+
+    def __str__(self):
+        return f"Player('{self.ip}', {self.host})"
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)

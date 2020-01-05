@@ -1,6 +1,6 @@
 import socket
 
-from utility import MyThread
+from utility import MyThread, Player
 
 
 class Node:
@@ -9,9 +9,14 @@ class Node:
         self.port = port
         
     def send(self, data, ip=None, **kwargs):
+        '''
+        Send a message to a given ip.
+        If ip is not provided (or None) sends a message to all ip adresses in range from 192.168.1.0 to 192.168.1.255
+        Message is a dictionary, which holds a sender's ip, a text, and any other passed arguments.
+        '''
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
-        message = {'ip': self.ip, 'message': data}
+        message = {'ip': self.ip, 'text': data}
         for key, value in kwargs.items():
             message[key] = value
         if ip is None:
@@ -20,19 +25,28 @@ class Node:
         else:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
 
-    def recieve(self):
-    # Awaits for any one message.
+    def recieve(self, var, key):
+        '''
+        Awaits for any one message and writes it in a variable provided.
+        '''
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
         sock.bind(('0.0.0.0', self.port))
 
-        s = sock.recv(128)
+        s = sock.recv(4096)
         message = eval(s.decode('utf-8'))
-        #var = eval(message.decode('utf-8'))
+        for mes_key in message.keys():
+            try:
+                message[mes_key] = eval(message[key])
+            except Exception:
+                pass
+        if isinstance(var[key], list):
+            var[key].append(message)
+        else:
+            var[key] = message
         return message
 
-    #def await_recieve(self, data, match=None, flag=None, stop_count=1):
     def await_recieve(self, *args):
         '''
         Awaits for a particular message.
@@ -61,9 +75,14 @@ class Node:
         stops = [0] * len(stop_counts)
 
         while True:
-            s = sock.recv(128)
+            s = sock.recv(4096)
             message = eval(s.decode('utf-8'))
-            if message['message'] == 'exit':
+            for key in message.keys():
+                try:
+                    message[key] = eval(message[key])
+                except Exception:
+                    pass
+            if message['text'] == '__STOP_RECIEVE__':
                 return
             for i, (data, match, flag, stop_count, stop) in enumerate(zip(datas, matches, flags, stop_counts, stops)):
                 if data == message[match]:
@@ -81,9 +100,12 @@ class Node:
                             elif elem[2] == '__VALUE_DEL__':
                                 if isinstance(elem[0][elem[1]], list):
                                     for inner_elem in elem[0][elem[1]]:
-                                        if inner_elem[match] in message[match]:
-                                            elem[0][elem[1]].remove(inner_elem)
-                                            break
+                                        try:
+                                            if inner_elem[match] in message[match]:
+                                                elem[0][elem[1]].remove(inner_elem)
+                                                break
+                                        except KeyError:
+                                            pass
                             else:
                                 if isinstance(elem[0][elem[1]], list):
                                     elem[0][elem[1]].remove(message[match])
@@ -92,4 +114,4 @@ class Node:
                 if stops[i] != stop_counts[i]:
                     break
             else:
-                return
+                return message
