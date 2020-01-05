@@ -6,8 +6,8 @@ import trace
 
 
 class MyThread(threading.Thread):
-    def __init__(self, func, *args, **kwargs):
-        super().__init__()
+    def __init__(self, func, name, *args, **kwargs):
+        super().__init__(name=name)
         self.func = func
         self.args = args
         self.kwargs = kwargs
