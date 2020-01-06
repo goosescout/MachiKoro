@@ -2,7 +2,7 @@ import os
 import sys
 import pygame
 import threading
-import trace
+import copy
 
 
 class MyThread(threading.Thread):
@@ -50,8 +50,24 @@ class Player:
         return f"Player('{self.ip}', {self.host})"
 
 
+class Card:
+    def __init__(self, image, name, type_, die_roll, description, cost):
+        self.image = image
+        self.name = name
+        self.type = type_
+        self.die_roll = die_roll
+        self.description = description
+        self.cost = cost
+
+    def get_image(self):
+        return self.image
+
+    def __rmul__(self, num):
+        return [copy.copy(self) for _ in range(num)]
+
+
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('data', name).replace('\\', '/')
     image = pygame.image.load(fullname).convert()
     if colorkey is not None:
         if colorkey == -1:

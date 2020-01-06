@@ -7,7 +7,8 @@ from random import shuffle
 import pygame
 
 from node import Node
-from utility import MyThread, Player, load_image
+from utility import MyThread, Player, load_image, Card
+from cards import ALL_CARDS
 
 
 class Notification(pygame.sprite.Sprite):
@@ -43,19 +44,14 @@ class Notification(pygame.sprite.Sprite):
                 self.image.blit(line, (20, shift * (i + 1)))
 
 
-class Card:
-    def __init__(self, image, name, type_, die_roll, description):
-        self.image = image
-        self.name = name
-        self.type = type_
-        self.die_roll = die_roll
-        self.description = description
-
-
-class CardSprite(pygame.sprite.Sprite):
-    def __init__(self, group, card):
+class ShopCardSprite(pygame.sprite.Sprite):
+    def __init__(self, group, card, row, col):
         super().__init__(group)
         self.card = card
+        self.image = pygame.transform.scale(load_image(self.card.get_image()), (80, 120))
+        self.rect = self.image.get_rect()
+        self.rect.x = 400 + 110 * row
+        self.rect.y = 10 + 130 * col
 
 
 class PlayerIcon(pygame.sprite.Sprite):
@@ -470,7 +466,6 @@ class Game:
                                         if len(players) > 1:
                                             if thread.is_alive():
                                                 self.stop_threads()
-                                            print(threading.enumerate())
                                             self.players = [
                                                 Player(player, player == self.node.ip) for player in players]
                                             shuffle(self.players)
@@ -549,12 +544,26 @@ class Game:
         self.buttons_group.empty()
         self.notification_group.empty()
         self.players_icon_group = pygame.sprite.Group()
+        self.shop_group = pygame.sprite.Group()
+        self.deck = 6 * ALL_CARDS['wheat_field'] + 6 * ALL_CARDS['ranch'] + 6 * ALL_CARDS['forest'] +\
+                    6 * ALL_CARDS['mine'] + 6 * ALL_CARDS['apple_orchard'] + 6 * ALL_CARDS['bakery'] +\
+                    6 * ALL_CARDS['convenience_store'] + 6 * ALL_CARDS['cheese_factory'] +\
+                    6 * ALL_CARDS['furniture_factory'] + 6 * ALL_CARDS['market'] + 6 * ALL_CARDS['cafe'] +\
+                    6 * ALL_CARDS['family_restaurant'] + 4 * ALL_CARDS['stadium'] +\
+                    6 * ALL_CARDS['tv_station'] + 6 * ALL_CARDS['business_center']
+        #self.deck = [*(15 * ALL_CARDS['wheat_field'])]
+        shuffle(self.deck)
+
+        for x in range(5):
+            for y in range(3):
+                ShopCardSprite(self.shop_group, self.deck.pop(), x, y)
 
         myself = list(filter(lambda x: x.get_ip() ==
                              self.node.ip, self.players))[0]
 
         for i, player in enumerate(self.players):
             PlayerIcon(self.players_icon_group, i == 0, myself == player, player, i)
+
 
         def update_screen():
             background = pygame.transform.scale(load_image(
@@ -606,6 +615,8 @@ class Game:
                                                 self.node.send(
                                                     'exit game', player.get_ip())
                                         self.players = []
+                                        self.shop_group.emty()
+                                        self.players_icon_group.empty()
                                         return self.start_screen
                                     elif button == end_turn:
                                         for player in self.players:
@@ -641,6 +652,7 @@ class Game:
 
             update_screen()
             self.players_icon_group.draw(self.screen)
+            self.shop_group.draw(self.screen)
             self.buttons_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
