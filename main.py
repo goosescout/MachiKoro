@@ -49,13 +49,23 @@ class ShopNotification(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(load_image('button.png'), (880, 320))
         self.card_image = pygame.transform.scale(load_image(card_sprite.card.get_image()), (180, 270))
         self.image.blit(self.card_image, (690, 25))
+        self.player = player
+        self.is_active = is_active
+        self.card = card_sprite.card
 
         self.close_button = Button(group, 225, 450, 'close', (150, 50), fontsize=50)
         self.buy_button = Button(group, 390, 450, 'buy', (150, 50), fontsize=50)
+        self.buy_button.make_inactive()
 
         self.rect = self.image.get_rect()
         self.rect.x = 200
         self.rect.y = 200
+
+    def update(self, is_active):
+        if is_active and self.player.get_money() >= self.card.cost and not self.buy_button.active and self.player.buy_flag:
+            self.buy_button.make_active()
+        elif not is_active and self.player.get_money() < self.card.cost and self.buy_button.active and not self.player.buy_flag:
+            self.buy_button.make_inactive()
 
 
 class ShopCardSprite(pygame.sprite.Sprite):
@@ -108,6 +118,7 @@ class PlayerIcon(pygame.sprite.Sprite):
         self.image.blit(line, (215, 65))
         line = self.font.render(self.player.get_ip() if not self.is_myself else 'me', 1, pygame.Color('black'))
         self.image.blit(line, (5, 5))
+
 
 class Cursor(pygame.sprite.Sprite):
     def __init__(self, group):
@@ -164,17 +175,18 @@ class Button(pygame.sprite.Sprite):
             self.pressed = True
 
     def unpress(self):
-        if self.size is None:
-            self.image = load_image('button.png')
-        else:
-            self.image = pygame.transform.scale(
-                load_image('button.png'), self.size)
-        self.image.blit(self.rendered_text, self.place)
-        if self.pressed:
-            self.pressed = False
-            return True
-        else:
-            return False
+        if self.active:
+            if self.size is None:
+                self.image = load_image('button.png')
+            else:
+                self.image = pygame.transform.scale(
+                    load_image('button.png'), self.size)
+            self.image.blit(self.rendered_text, self.place)
+            if self.pressed:
+                self.pressed = False
+                return True
+            else:
+                return False
 
     def update(self, *args, **kwargs):
         self.unpress()
@@ -412,7 +424,8 @@ class Game:
 
         counter = 0
         flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False,
-                 'players': [{'ip': self.node.ip}, {'ip': self.node.ip}], 'game_host': {'ip': '1'}, 'game_connected': False,
+                 'players': [{'ip': self.node.ip}, {'ip': self.node.ip}], 'game_host': {'ip': '1'},
+                 'game_connected': False,
                  'game_closed': False, 'game_started': {'text': False}}
         while True:
             for event in pygame.event.get():
@@ -427,10 +440,10 @@ class Game:
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 button.press()
-                        for elem in self.notification_group:
-                            if isinstance(elem, Button):
-                                if elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                    elem.press()
+                            for elem in self.notification_group:
+                                if isinstance(elem, Button):
+                                    if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                        elem.press()
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -444,11 +457,12 @@ class Game:
                                         flags['game_closed'] = False
                                         notification = Notification(self.notification_group,
                                                                     ('searching for the game.',))
-                                        thread = MyThread(self.node.await_recieve, 'serching', ['searching for players', 'text',
-                                                                                                [[flags, 'game_found', True],
-                                                                                                 [flags, 'game_host', '__VALUE__'],
-                                                                                                 [flags, 'searching_for_game',
-                                                                                                  False]], 1])
+                                        thread = MyThread(self.node.await_recieve, 'serching',
+                                                          ['searching for players', 'text',
+                                                           [[flags, 'game_found', True],
+                                                            [flags, 'game_host', '__VALUE__'],
+                                                            [flags, 'searching_for_game',
+                                                             False]], 1])
                                         thread.start()
                                     elif button == new_game:
                                         notification = Notification(self.notification_group,
@@ -525,7 +539,8 @@ class Game:
                     thread = MyThread(self.node.await_recieve, 'game_start_stop', ['search stopped', 'text',
                                                                                    [[flags, 'game_host', {'ip': -1}],
                                                                                     [flags, 'game_found', False],
-                                                                                    [flags, 'searching_for_game', False],
+                                                                                    [flags, 'searching_for_game',
+                                                                                     False],
                                                                                     [flags, 'game_connected', False],
                                                                                     [flags, 'game_closed', True]], 1],
                                       ['start game', 'text',
@@ -552,7 +567,7 @@ class Game:
                     for player in players:
                         if player.get_ip() != self.node.ip:
                             self.node.send('start game', player,
-                                            players=list(map(str, self.players)))
+                                           players=list(map(str, self.players)))
                     return self.game_screen
                 if counter % 20 == 0:
                     self.node.send('searching for players')
@@ -577,11 +592,11 @@ class Game:
         self.players_icon_group = pygame.sprite.Group()
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
-        self.deck = 6 * ALL_CARDS['wheat_field'] + 6 * ALL_CARDS['ranch'] + 6 * ALL_CARDS['forest'] +\
-                    6 * ALL_CARDS['mine'] + 6 * ALL_CARDS['apple_orchard'] + 6 * ALL_CARDS['bakery'] +\
-                    6 * ALL_CARDS['convenience_store'] + 6 * ALL_CARDS['cheese_factory'] +\
-                    6 * ALL_CARDS['furniture_factory'] + 6 * ALL_CARDS['market'] + 6 * ALL_CARDS['cafe'] +\
-                    6 * ALL_CARDS['family_restaurant'] + 4 * ALL_CARDS['stadium'] +\
+        self.deck = 6 * ALL_CARDS['wheat_field'] + 6 * ALL_CARDS['ranch'] + 6 * ALL_CARDS['forest'] + \
+                    6 * ALL_CARDS['mine'] + 6 * ALL_CARDS['apple_orchard'] + 6 * ALL_CARDS['bakery'] + \
+                    6 * ALL_CARDS['convenience_store'] + 6 * ALL_CARDS['cheese_factory'] + \
+                    6 * ALL_CARDS['furniture_factory'] + 6 * ALL_CARDS['market'] + 6 * ALL_CARDS['cafe'] + \
+                    6 * ALL_CARDS['family_restaurant'] + 4 * ALL_CARDS['stadium'] + \
                     4 * ALL_CARDS['tv_station'] + 4 * ALL_CARDS['business_center']
         shuffle(self.deck)
 
@@ -590,11 +605,10 @@ class Game:
                 ShopCardSprite(self.shop_group, self.deck.pop(), x, y)
 
         myself = list(filter(lambda x: x.get_ip() ==
-                             self.node.ip, self.players))[0]
+                                       self.node.ip, self.players))[0]
 
         for i, player in enumerate(self.players):
             PlayerIcon(self.players_icon_group, i == 0, myself == player, player, i)
-
 
         def update_screen():
             background = pygame.transform.scale(load_image(
@@ -633,6 +647,10 @@ class Game:
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 button.press()
+                            for elem in self.shop_notifications_group:
+                                if isinstance(elem, Button):
+                                    if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                        elem.press()
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -646,7 +664,7 @@ class Game:
                                                 self.node.send(
                                                     'exit game', player.get_ip())
                                         self.players = []
-                                        self.shop_group.emty()
+                                        self.shop_group.empty()
                                         self.players_icon_group.empty()
                                         return self.start_screen
                                     elif button == end_turn:
@@ -657,8 +675,28 @@ class Game:
                                         cur_turn += 1
                         for card in self.shop_group:
                             if card.rect.collidepoint(pygame.mouse.get_pos()):
-                                notification = ShopNotification(self.shop_notifications_group, card, myself, myself == cur_player)
+                                notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
+                                                                cur_player)
+                        for elem in self.shop_notifications_group:
+                            if isinstance(elem, Button):
+                                if elem.unpress():
+                                    if elem == notification.buy_button:
+                                        if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                            if notification.player.get_money() >= notification.card.cost and \
+                                                    notification.is_active and myself.buy_flag:
+                                                myself.get_cards()[notification.card.type].append(notification.card)
+                                                myself.money -= notification.card.cost
+                                                myself.buy_flag = False
+                                                self.shop_notifications_group.empty()
+                                    elif elem == notification.close_button:
+                                        if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                            self.shop_notifications_group.empty()
                         self.buttons_group.update()
+
+            try:
+                notification.update(myself == cur_player)
+            except Exception:
+                pass
 
             if latest_message['message']['ip'] is not None:
                 message = latest_message['message']

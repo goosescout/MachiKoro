@@ -30,6 +30,7 @@ class Player:
                       }
         self.landmarks = ['Something']
         self.money = 3
+        self.buy_flag = True
 
     def is_host(self):
         return self.host
