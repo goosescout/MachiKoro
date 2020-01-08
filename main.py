@@ -52,6 +52,14 @@ class ShopNotification(pygame.sprite.Sprite):
         self.player = player
         self.is_active = is_active
         self.card = card_sprite.card
+        text = [self.card.name] + self.card.description
+
+        self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 45)
+        self.color = pygame.Color('black')
+        shift = 220 // (len(text) + 1)
+        for i, line in enumerate(text):
+            line = self.font.render(line, 1, self.color)
+            self.image.blit(line, (20, shift * (i + 1)))
 
         self.close_button = Button(group, 225, 450, 'close', (150, 50), fontsize=50)
         self.buy_button = Button(group, 390, 450, 'buy', (150, 50), fontsize=50)
@@ -677,6 +685,7 @@ class Game:
                             if card.rect.collidepoint(pygame.mouse.get_pos()):
                                 notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
                                                                 cur_player)
+                                # добавить text карты
                         for elem in self.shop_notifications_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
