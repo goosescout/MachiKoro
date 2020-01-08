@@ -22,6 +22,10 @@ class Node:
         if ip is None:
             for i in range(256):
                 sock.sendto(bytes(str(message), encoding='utf-8'), (f'192.168.1.{i}', self.port))
+        elif isinstance(ip, list) or isinstance(ip, map):
+            for elem in ip:
+                if elem != self.ip:
+                    sock.sendto(bytes(str(message), encoding='utf-8'), (elem, self.port))
         else:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
 
