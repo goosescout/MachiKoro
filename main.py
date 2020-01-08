@@ -432,7 +432,7 @@ class Game:
 
         counter = 0
         flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False,
-                 'players': [{'ip': self.node.ip}, {'ip': self.node.ip}], 'game_host': {'ip': '1'},
+                 'players': [{'ip': self.node.ip}], 'game_host': {'ip': '1'},
                  'game_connected': False,
                  'game_closed': False, 'game_started': {'text': False}}
         while True:
@@ -518,10 +518,17 @@ class Game:
                                             self.players = [
                                                 Player(player, player == self.node.ip) for player in players]
                                             shuffle(self.players)
+                                            self.deck = 6 * ALL_CARDS['wheat_field'] + 6 * ALL_CARDS['ranch'] + 6 * ALL_CARDS['forest'] + \
+                                                        6 * ALL_CARDS['mine'] + 6 * ALL_CARDS['apple_orchard'] + 6 * ALL_CARDS['bakery'] + \
+                                                        6 * ALL_CARDS['convenience_store'] + 6 * ALL_CARDS['cheese_factory'] + \
+                                                        6 * ALL_CARDS['furniture_factory'] + 6 * ALL_CARDS['market'] + 6 * ALL_CARDS['cafe'] + \
+                                                        6 * ALL_CARDS['family_restaurant'] + 4 * ALL_CARDS['stadium'] + \
+                                                        4 * ALL_CARDS['tv_station'] + 4 * ALL_CARDS['business_center']
+                                            shuffle(self.deck)
                                             for player in players:
                                                 if player != self.node.ip:
                                                     self.node.send('start game', player, players=list(
-                                                        map(str, self.players)))
+                                                        map(str, self.players)), deck=list(map(str, self.deck)))
                                             return self.game_screen
 
                         self.buttons_group.update()
@@ -564,10 +571,6 @@ class Game:
                     self.stop_threads()
             if flags['searching_for_players']:
                 players = [elem['ip'] for elem in flags['players']]
-                if len(players) > 1:
-                    notification.add_button.make_active()
-                else:
-                    notification.add_button.make_inactive()
                 if len(players) == 4:
                     self.players = [
                         Player(player, player == self.node.ip) for player in players]
@@ -575,15 +578,21 @@ class Game:
                     for player in players:
                         if player.get_ip() != self.node.ip:
                             self.node.send('start game', player,
-                                           players=list(map(str, self.players)))
+                                           players=list(map(str, self.players)), deck=list(map(str, self.deck)))
                     return self.game_screen
                 if counter % 20 == 0:
                     self.node.send('searching for players')
                     notification.update(
                         text=[f'searching for players ({len(players)}/4)' + "." * abs(counter % 3 - 3)] + players)
+                    if len(players) > 1:
+                        notification.add_button.make_active()
+                    else:
+                        notification.add_button.make_inactive()
             if flags['game_started']['text']:
-                self.players = list(
-                    map(eval, flags['game_started']['players']))
+                self.players = list(map(eval, flags['game_started']['players']))
+                self.deck = list(map(eval, flags['game_started']['deck']))
+                for card in self.deck:
+                    card.description = eval(card.description)
                 self.stop_threads()
                 return self.game_screen
 
@@ -600,13 +609,6 @@ class Game:
         self.players_icon_group = pygame.sprite.Group()
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
-        self.deck = 6 * ALL_CARDS['wheat_field'] + 6 * ALL_CARDS['ranch'] + 6 * ALL_CARDS['forest'] + \
-                    6 * ALL_CARDS['mine'] + 6 * ALL_CARDS['apple_orchard'] + 6 * ALL_CARDS['bakery'] + \
-                    6 * ALL_CARDS['convenience_store'] + 6 * ALL_CARDS['cheese_factory'] + \
-                    6 * ALL_CARDS['furniture_factory'] + 6 * ALL_CARDS['market'] + 6 * ALL_CARDS['cafe'] + \
-                    6 * ALL_CARDS['family_restaurant'] + 4 * ALL_CARDS['stadium'] + \
-                    4 * ALL_CARDS['tv_station'] + 4 * ALL_CARDS['business_center']
-        shuffle(self.deck)
 
         for x in range(5):
             for y in range(3):
@@ -685,7 +687,6 @@ class Game:
                             if card.rect.collidepoint(pygame.mouse.get_pos()):
                                 notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
                                                                 cur_player)
-                                # добавить text карты
                         for elem in self.shop_notifications_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():

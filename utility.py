@@ -66,6 +66,8 @@ class Card:
     def __rmul__(self, num):
         return [copy.copy(self) for _ in range(num)]
 
+    def __str__(self):
+        return f'Card("{self.image}", "{self.name}", "{self.type}", "{self.die_roll}", "{self.description}", "{self.cost}")'
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)

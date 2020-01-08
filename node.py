@@ -1,6 +1,6 @@
 import socket
 
-from utility import MyThread, Player
+from utility import MyThread, Player, Card
 
 
 class Node:
@@ -75,7 +75,7 @@ class Node:
         stops = [0] * len(stop_counts)
 
         while True:
-            s = sock.recv(4096)
+            s = sock.recv(65536)
             message = eval(s.decode('utf-8'))
             for key in message.keys():
                 try:
