@@ -1,6 +1,6 @@
 import socket
 
-from utility import MyThread, Player
+from utility import MyThread, Player, Card
 
 
 class Node:
@@ -22,6 +22,10 @@ class Node:
         if ip is None:
             for i in range(256):
                 sock.sendto(bytes(str(message), encoding='utf-8'), (f'192.168.1.{i}', self.port))
+        elif isinstance(ip, list) or isinstance(ip, map):
+            for elem in ip:
+                if elem != self.ip:
+                    sock.sendto(bytes(str(message), encoding='utf-8'), (elem, self.port))
         else:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
 
@@ -75,7 +79,7 @@ class Node:
         stops = [0] * len(stop_counts)
 
         while True:
-            s = sock.recv(4096)
+            s = sock.recv(65536)
             message = eval(s.decode('utf-8'))
             for key in message.keys():
                 try:

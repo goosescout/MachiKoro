@@ -2,7 +2,7 @@ import os
 import sys
 import pygame
 import threading
-import trace
+import copy
 
 
 class MyThread(threading.Thread):
@@ -30,6 +30,7 @@ class Player:
                       }
         self.landmarks = ['Something']
         self.money = 3
+        self.buy_flag = True
 
     def is_host(self):
         return self.host
@@ -49,6 +50,24 @@ class Player:
     def __str__(self):
         return f"Player('{self.ip}', {self.host})"
 
+
+class Card:
+    def __init__(self, image, name, type_, die_roll, description, cost):
+        self.image = image
+        self.name = name
+        self.type = type_
+        self.die_roll = die_roll
+        self.description = description
+        self.cost = cost
+
+    def get_image(self):
+        return self.image
+
+    def __rmul__(self, num):
+        return [copy.copy(self) for _ in range(num)]
+
+    def __str__(self):
+        return f'Card("{self.image}", "{self.name}", "{self.type}", "{self.die_roll}", "{self.description}", "{self.cost}")'
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
