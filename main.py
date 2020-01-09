@@ -2,7 +2,7 @@ import os
 import socket
 import sys
 import threading
-from random import shuffle
+from random import shuffle, randint
 
 import pygame
 
@@ -650,6 +650,29 @@ class Game:
                 notification.sprite.kill()
                 self.shop_notifications_group.empty()
 
+        def trigger_cards(die_roll, cur_player, myself):
+            result = 0
+            for player in self.players:
+                for type_ in player.get_cards().keys():
+                    if type_ in {'wheat', 'cow', 'gear'}:
+                        for card in player.get_cards()[type_]:
+                            if player == myself:
+                                if die_roll in card.die_roll:
+                                    result += card.get_production()
+                            if die_roll in card.die_roll:
+                                player.money += card.get_production()
+                    elif type_ in {'bread', 'factory', 'fruit', 'major'} and cur_player == player:
+                        for card in player.get_cards()[type_]:
+                            if player == myself:
+                                if die_roll in card.die_roll:
+                                    result += card.get_production()
+                            if die_roll in card.die_roll:
+                                player.money += card.get_production()
+                    elif type_ == 'cup' and cur_player != player:
+                        pass
+
+            return result
+
         for x in range(5):
             for y in range(3):
                 ShopCardSprite(self.shop_group, self.deck.pop(), x, y)
@@ -683,6 +706,14 @@ class Game:
                 end_turn = Button(self.buttons_group, 1060,
                                   650, 'end turn', (200, 50), fontsize=50)
 
+            if cur_player == myself and not cur_player.dice_rolled:
+                cur_die_roll = randint(1, 6)
+                self.node.send(f'roll {cur_die_roll}', map(lambda x: x.ip, self.players))
+                cur_player.dice_rolled = True
+                result = trigger_cards(cur_die_roll, cur_player, myself)
+                s = 's' if result == 1 else ''
+                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
@@ -695,10 +726,14 @@ class Game:
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 button.press()
-                            for elem in self.shop_notifications_group:
-                                if isinstance(elem, Button):
-                                    if elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                        elem.press()
+                        for elem in self.shop_notifications_group:
+                            if isinstance(elem, Button):
+                                if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                    elem.press()
+                        for elem in self.notification_group:
+                            if isinstance(elem, Button):
+                                if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                    elem.press()
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -732,6 +767,12 @@ class Game:
                                     elif elem == notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.shop_notifications_group.empty()
+                        for elem in self.notification_group:
+                            if isinstance(elem, Button):
+                                if elem.unpress():
+                                    if elem == notification.button:
+                                        if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                            self.notification_group.empty()
                         self.buttons_group.update()
 
             try:
@@ -742,7 +783,10 @@ class Game:
             if latest_message['message']['ip'] is not None:
                 message = latest_message['message']
                 if message['text'] == 'end turn':
+                    self.notification_group.empty()
                     cur_turn += 1
+                    cur_player = self.players[cur_turn % len(self.players)]
+                    cur_player.dice_rolled = False
                 elif message['text'] == 'exit game':
                     for i, player in enumerate(self.players):
                         if player.get_ip() == message['ip']:
@@ -755,6 +799,12 @@ class Game:
                 elif message['text'] == 'buy':
                     buy_card(list(filter(lambda x: x.ip == message['ip'], self.players))[
                              0], list(filter(lambda x: x.get_coords() == message['coords'], self.shop_group))[0], False)
+                elif 'rolled' in message['text']:
+                    cur_die_roll = int(message['text'].split()[1])
+                    cur_player.dice_rolled = True
+                    result = trigger_cards(cur_die_roll, cur_player, myself)
+                    s = 's' if result == 1 else ''
+                    notification = Notification(self.notification_group, [f"{message['ip']} rolled {cur_die_roll}", f'You got {result} coin{s}'])
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
                     self.node.recieve, 'reciever', latest_message, 'message')
@@ -770,6 +820,7 @@ class Game:
             self.players_icon_group.draw(self.screen)
             self.shop_group.draw(self.screen)
             self.buttons_group.draw(self.screen)
+            self.notification_group.draw(self.screen)
             self.shop_notifications_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)

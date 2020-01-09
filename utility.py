@@ -23,14 +23,15 @@ class Player:
         self.ip = ip
         self.host = host
 
-        self.cards = {'wheat': [], 'cow': [], 'gear': [], 'boat': [],  # add wheat field
-                      'bread': [], 'factory': [], 'fruit': [],  # add bakery
+        self.cards = {'wheat': [Card('cards/Wheat_Field.png', 'Wheat Field', 'wheat', (1,), ['Get 1 coin', '(On everyone`s turn)'], 1)], 'cow': [], 'gear': [], 'boat': [],  # add wheat field
+                      'bread': [Card('cards/Bakery.png', 'Bakery', 'bread', (2, 3), ['Get 1 coin', '(On your turn only)'], 1)], 'factory': [], 'fruit': [],  # add bakery
                       'cup': [],
                       'major': []
                       }
         self.landmarks = ['Something']
         self.money = 3
         self.buy_flag = True
+        self.dice_rolled = False
 
     def is_host(self):
         return self.host
@@ -68,6 +69,10 @@ class Card:
 
     def __str__(self):
         return f'Card("{self.image}", "{self.name}", "{self.type}", "{self.die_roll}", "{self.description}", "{self.cost}")'
+
+    def get_production(self):
+        print(int(self.description[0].split()[1]), self.name)
+        return int(self.description[0].split()[1])
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
