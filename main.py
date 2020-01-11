@@ -611,8 +611,8 @@ class Game:
                 self.deck = list(map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
                 for card in self.deck:
                     card.cost = int(card.cost)
-                    card.die_roll = eval(card.die_roll)
-                    card.description = eval(card.description)
+                    card.die_roll = card.die_roll
+                    card.description = card.description
                 self.stop_threads()
                 return self.game_screen
 
@@ -646,8 +646,8 @@ class Game:
 
             if is_myself:
                 self.node.send('buy', map(lambda x: x.ip, self.players),
-                               coords=notification.sprite.get_coords())
-                notification.sprite.kill()
+                               coords=shop_notification.sprite.get_coords())
+                shop_notification.sprite.kill()
                 self.shop_notifications_group.empty()
 
         def trigger_cards(die_roll, cur_player, myself):
@@ -762,9 +762,9 @@ class Game:
                                 if elem.unpress():
                                     if elem == shop_notification.buy_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                            if notification.is_active and myself.buy_flag:
+                                            if shop_notification.is_active and myself.buy_flag:
                                                 buy_card(
-                                                    myself, notification.sprite, True)
+                                                    myself, shop_notification.sprite, True)
                                     elif elem == shop_notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.shop_notifications_group.empty()
@@ -777,7 +777,7 @@ class Game:
                         self.buttons_group.update()
 
             try:
-                notification.update(myself == cur_player)
+                shop_notification.update(myself == cur_player)
             except Exception:
                 pass
 

@@ -5,7 +5,13 @@ from utility import MyThread, Player, Card
 
 class Node:
     def __init__(self, port=11719):
-        self.ip = socket.gethostbyname(socket.gethostname())
+        hostname = socket.gethostname()
+
+        if "MacBook" in hostname:
+            self.ip = '172.20.10.11'
+        else:
+            self.ip = socket.gethostbyname(hostname)
+
         self.port = port
         
     def send(self, data, ip=None, **kwargs):
@@ -22,10 +28,11 @@ class Node:
         if ip is None:
             #for i in range(256):
                 #sock.sendto(bytes(str(message), encoding='utf-8'), (f'192.168.1.{i}', self.port))
-            sock.sendto(bytes(str(message), encoding='utf-8'), (f'712.20.10.11', self.port))
+                sock.sendto(bytes(str(message), encoding='utf-8'), (f'172.20.10.3', self.port))
         elif isinstance(ip, list) or isinstance(ip, map):
             for elem in ip:
                 if elem != self.ip:
+                    print(message)
                     sock.sendto(bytes(str(message), encoding='utf-8'), (elem, self.port))
         else:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
