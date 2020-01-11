@@ -799,7 +799,7 @@ class Game:
                 elif message['text'] == 'buy':
                     buy_card(list(filter(lambda x: x.ip == message['ip'], self.players))[
                              0], list(filter(lambda x: x.get_coords() == message['coords'], self.shop_group))[0], False)
-                elif 'rolled' in message['text']:
+                elif 'roll' in message['text']:
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
                     result = trigger_cards(cur_die_roll, cur_player, myself)
