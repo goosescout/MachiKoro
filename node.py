@@ -10,7 +10,7 @@ class Node:
         if "MacBook" in self.hostname:
             self.ip = '172.20.10.11'
         else:
-            self.ip = socket.gethostbyname(hostname)
+            self.ip = socket.gethostbyname(self.hostname)
 
         self.port = port
         
