@@ -610,7 +610,7 @@ class Game:
                     map(eval, flags['game_started']['players']))
                 self.deck = list(map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
                 for card in self.deck:
-                    card.cost = int(card.cost)
+                    card.cost = card.cost
                     card.die_roll = card.die_roll
                     card.description = card.description
                 self.stop_threads()
@@ -765,6 +765,8 @@ class Game:
                                             if shop_notification.is_active and myself.buy_flag:
                                                 buy_card(
                                                     myself, shop_notification.sprite, True)
+                                            else:
+                                                elem.make_inactive()
                                     elif elem == shop_notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.shop_notifications_group.empty()
