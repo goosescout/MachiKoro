@@ -633,7 +633,7 @@ class Game:
         self.players_icon_group = pygame.sprite.Group()
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
-        self.take_cards = False
+        self.take_money = False
         self.take = 0
 
         def update_screen():
