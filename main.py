@@ -624,6 +624,10 @@ class Game:
             pygame.display.flip()
 
     def game_screen(self):
+        latest_message = {'message': {'ip': None}}
+        listener_thread = MyThread(
+            self.node.recieve, 'reciever', latest_message, 'message')
+        listener_thread.start()
         self.buttons_group.empty()
         self.notification_group.empty()
         self.players_icon_group = pygame.sprite.Group()
@@ -690,10 +694,6 @@ class Game:
                           (200, 50), fontsize=50) if self.players[0] == myself else None
 
         cur_turn = 0
-        latest_message = {'message': {'ip': None}}
-        listener_thread = MyThread(
-            self.node.recieve, 'reciever', latest_message, 'message')
-        listener_thread.start()
 
         while True:
             cur_player = self.players[cur_turn % len(self.players)]
@@ -799,6 +799,7 @@ class Game:
                             del self.players[i]
                             break
                     if len(self.players) == 1:
+                        self.notification_group.empty()
                         return self.start_screen
                 elif message['text'] == 'buy':
                     buy_card(list(filter(lambda x: x.ip == message['ip'], self.players))[

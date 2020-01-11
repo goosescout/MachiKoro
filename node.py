@@ -13,6 +13,7 @@ class Node:
             self.ip = socket.gethostbyname(self.hostname)
 
         self.port = port
+        self.queque = []
         
     def send(self, data, ip=None, **kwargs):
         '''
@@ -32,7 +33,6 @@ class Node:
         elif isinstance(ip, list) or isinstance(ip, map):
             for elem in ip:
                 if elem != self.ip:
-                    print(message)
                     sock.sendto(bytes(str(message), encoding='utf-8'), (elem, self.port))
         else:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
@@ -41,6 +41,14 @@ class Node:
         '''
         Awaits for any one message and writes it in a variable provided.
         '''
+        if self.queque:
+            message = self.queque.pop()
+            if isinstance(var[key], list):
+                var[key].append(message)
+            else:
+                var[key] = message
+            return message
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
@@ -122,6 +130,8 @@ class Node:
                                 if isinstance(elem[0][elem[1]], list):
                                     elem[0][elem[1]].remove(message[match])
                         stops[i] += 1
+            if 'roll' in message['text']:
+                self.queque.append(message)
             for i in range(len(stops)):
                 if stops[i] != stop_counts[i]:
                     break
