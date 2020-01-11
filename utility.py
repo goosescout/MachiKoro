@@ -64,6 +64,9 @@ class Card:
     def get_image(self):
         return self.image
 
+    def get_name(self):
+        return self.name
+
     def __rmul__(self, num):
         return [copy.copy(self) for _ in range(num)]
 
@@ -72,7 +75,6 @@ class Card:
         return self.name.lower().replace(' ', '_') if self.name != 'Fruit and Vegetable Market' else 'market'
 
     def get_production(self):
-        print(int(self.description[0].split()[1]), self.name)
         return int(self.description[0].split()[1])
 
 def load_image(name, colorkey=None):

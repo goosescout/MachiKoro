@@ -56,7 +56,7 @@ class ShopNotification(pygame.sprite.Sprite):
         self.is_active = is_active
         self.card = card_sprite.card
         self.sprite = card_sprite
-        text = [self.card.name] + self.card.description
+        text = [self.card.get_name()] + self.card.description
 
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 45)
         self.color = pygame.Color('black')
@@ -660,20 +660,50 @@ class Game:
                 for type_ in player.get_cards().keys():
                     if type_ in {'wheat', 'cow', 'gear'}:
                         for card in player.get_cards()[type_]:
-                            if player == myself:
-                                if die_roll in card.die_roll:
-                                    result += card.get_production()
                             if die_roll in card.die_roll:
+                                if player == myself:
+                                    result += card.get_production()
                                 player.money += card.get_production()
-                    elif type_ in {'bread', 'factory', 'fruit', 'major'} and cur_player == player:
+                    elif type_ in {'bread', 'fruit'} and cur_player == player:
                         for card in player.get_cards()[type_]:
-                            if player == myself:
-                                if die_roll in card.die_roll:
-                                    result += card.get_production()
                             if die_roll in card.die_roll:
+                                if player == myself:
+                                    result += card.get_production()
                                 player.money += card.get_production()
                     elif type_ == 'cup' and cur_player != player:
                         pass
+                    elif type_ == 'fruit' and cur_player == player:
+                        for card in player.get_cards()[type_]:
+                            if die_roll in card.die_roll:
+                                if player == myself:
+                                    result += len(player.get_cards()['wheat']) * 3
+                                player.money += len(player.get_cards()['wheat']) * 3
+                    elif type_ == 'factory' and cur_player == player:
+                        for card in player.get_cards()[type_]:
+                            if card.get_name() == 'Cheese Factory':
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += len(player.get_cards()['cow']) * 3
+                                    player.money += len(player.get_cards()['cow']) * 3
+                            else:  # Furniture Factory
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += len(player.get_cards()['gear']) * 3
+                                    player.money += len(player.get_cards()['gear']) * 3
+                    elif type_ == 'major' and cur_player == player:
+                        for card in player.get_cards()[type_]:
+                            if card.get_name() == 'TV station':
+                                pass
+                            elif card.get_name() == 'Stadium':
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += (len(self.players) - 1) * 2
+                                    player.money += (len(self.players) - 1) * 2
+                                    for inner_player in self.players:
+                                        if inner_player != myself:
+                                            inner_player.money -= 2
+                            else:  # Business Center
+                                pass
 
             return result
 
@@ -706,7 +736,7 @@ class Game:
                                   650, 'end turn', (200, 50), fontsize=50)
 
             if cur_player == myself and not cur_player.dice_rolled:
-                cur_die_roll = randint(1, 6)
+                cur_die_roll = randint(1, 12)
                 self.node.send(f'roll {cur_die_roll}', map(lambda x: x.ip, self.players))
                 cur_player.dice_rolled = True
                 result = trigger_cards(cur_die_roll, cur_player, myself)
