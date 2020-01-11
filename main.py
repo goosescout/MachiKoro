@@ -697,7 +697,6 @@ class Game:
 
         while True:
             cur_player = self.players[cur_turn % len(self.players)]
-            cur_player.buy_flag = True
             if cur_player != myself and end_turn is not None:
                 self.buttons_group.remove(end_turn)
                 end_turn.kill()
@@ -752,19 +751,21 @@ class Game:
                                         self.node.send(
                                             'end turn', map(lambda x: x.ip, self.players))
                                         cur_turn += 1
+                                        cur_player = self.players[cur_turn % len(self.players)]
+                                        cur_player.buy_flag = True
                         for card in self.shop_group:
                             if card.rect.collidepoint(pygame.mouse.get_pos()):
-                                notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
+                                shop_notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
                                                                 cur_player)
                         for elem in self.shop_notifications_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
-                                    if elem == notification.buy_button:
+                                    if elem == shop_notification.buy_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             if notification.is_active and myself.buy_flag:
                                                 buy_card(
                                                     myself, notification.sprite, True)
-                                    elif elem == notification.close_button:
+                                    elif elem == shop_notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.shop_notifications_group.empty()
                         for elem in self.notification_group:
@@ -786,6 +787,7 @@ class Game:
                     self.notification_group.empty()
                     cur_turn += 1
                     cur_player = self.players[cur_turn % len(self.players)]
+                    cur_player.buy_flag = True
                     cur_player.dice_rolled = False
                 elif message['text'] == 'exit game':
                     for i, player in enumerate(self.players):
