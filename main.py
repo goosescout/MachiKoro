@@ -608,7 +608,7 @@ class Game:
             if flags['game_started']['text']:
                 self.players = list(
                     map(eval, flags['game_started']['players']))
-                self.deck = list(map(eval, flags['game_started']['deck']))
+                self.deck = list(map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
                 for card in self.deck:
                     card.cost = int(card.cost)
                     card.die_roll = eval(card.die_roll)

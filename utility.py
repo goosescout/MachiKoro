@@ -68,7 +68,8 @@ class Card:
         return [copy.copy(self) for _ in range(num)]
 
     def __str__(self):
-        return f'Card("{self.image}", "{self.name}", "{self.type}", "{self.die_roll}", "{self.description}", "{self.cost}")'
+        #return f'Card("{self.image}", "{self.name}", "{self.type}", "{self.die_roll}", "{self.description}", "{self.cost}")'
+        return self.name.lower().replace(' ', '_') if self.name != 'Fruit and Vegetable Market' else 'market'
 
     def get_production(self):
         print(int(self.description[0].split()[1]), self.name)
