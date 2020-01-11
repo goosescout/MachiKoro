@@ -633,6 +633,8 @@ class Game:
         self.players_icon_group = pygame.sprite.Group()
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
+        self.take_cards = False
+        self.take = 0
 
         def update_screen():
             background = pygame.transform.scale(load_image(
@@ -656,6 +658,7 @@ class Game:
 
         def trigger_cards(die_roll, cur_player, myself):
             result = 0
+            addition = False
             for player in self.players:
                 for type_ in player.get_cards().keys():
                     if type_ in {'wheat', 'cow', 'gear'}:
@@ -671,7 +674,11 @@ class Game:
                                     result += card.get_production()
                                 player.money += card.get_production()
                     elif type_ == 'cup' and cur_player != player:
-                        pass
+                        for card in player.get_cards()[type_]:
+                            if die_roll in card.die_roll:
+                                if player == myself:
+                                    result += card.get_production()
+                                addition = True
                     elif type_ == 'fruit' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
@@ -705,7 +712,7 @@ class Game:
                             else:  # Business Center
                                 pass
 
-            return result
+            return result, addition
 
         for x in range(5):
             for y in range(3):
@@ -739,9 +746,13 @@ class Game:
                 cur_die_roll = randint(1, 12)
                 self.node.send(f'roll {cur_die_roll}', map(lambda x: x.ip, self.players))
                 cur_player.dice_rolled = True
-                result = trigger_cards(cur_die_roll, cur_player, myself)
+                result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
                 s = 's' if result == 1 else ''
-                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                if self.take_money:
+                    notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result} coins form them'])
+                    self.take = result
+                else:
+                    notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -766,6 +777,13 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
+                        if self.take_money:
+                                for icon in self.players_icon_group:
+                                    if icon.rect.collidepoint(pygame.mouse.get_pos()):
+                                        icon.player -= self.take
+                                        myself.money += result
+                                        self.take = 0
+                                        self.take_money = False
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 if button.unpress():
@@ -837,7 +855,7 @@ class Game:
                 elif 'roll' in message['text']:
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
-                    result = trigger_cards(cur_die_roll, cur_player, myself)
+                    result, _ = trigger_cards(cur_die_roll, cur_player, myself)
                     s = 's' if result == 1 else ''
                     notification = Notification(self.notification_group, [f"{message['ip']} rolled {cur_die_roll}", f'You got {result} coin{s}'])
                 latest_message['message'] = {'ip': None}
