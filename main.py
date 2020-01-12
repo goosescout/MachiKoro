@@ -748,7 +748,7 @@ class Game:
                 cur_player.dice_rolled = True
                 result, _ = trigger_cards(cur_die_roll, cur_player, myself)
                 s = 's' if result == 1 else ''
-                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result} coins form them'])
+                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coins'])
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -779,7 +779,6 @@ class Game:
                                         minus = self.take if self.take >= icon.player.money else icon.player.money
                                         icon.player.money -= minus
                                         myself.money += minus
-
                                         self.take = 0
                                         self.take_money = False
                         for button in self.buttons_group:
@@ -856,7 +855,7 @@ class Game:
                     result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
                     s = 's' if result == 1 else ''
                     if self.take_money:
-                        notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result} coins form them'])
+                        notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result}', 'coins from them'])
                         self.take = result
                     else:
                         notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
