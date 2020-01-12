@@ -746,13 +746,9 @@ class Game:
                 cur_die_roll = randint(1, 12)
                 self.node.send(f'roll {cur_die_roll}', map(lambda x: x.ip, self.players))
                 cur_player.dice_rolled = True
-                result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
+                result, _ = trigger_cards(cur_die_roll, cur_player, myself)
                 s = 's' if result == 1 else ''
-                if self.take_money:
-                    notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result} coins form them'])
-                    self.take = result
-                else:
-                    notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result} coins form them'])
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -780,8 +776,10 @@ class Game:
                         if self.take_money:
                                 for icon in self.players_icon_group:
                                     if icon.rect.collidepoint(pygame.mouse.get_pos()):
-                                        icon.player -= self.take
-                                        myself.money += result
+                                        minus = self.take if self.take >= icon.player.money else icon.player.money
+                                        icon.player.money -= minus
+                                        myself.money += minus
+
                                         self.take = 0
                                         self.take_money = False
                         for button in self.buttons_group:
@@ -855,9 +853,13 @@ class Game:
                 elif 'roll' in message['text']:
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
-                    result, _ = trigger_cards(cur_die_roll, cur_player, myself)
+                    result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
                     s = 's' if result == 1 else ''
-                    notification = Notification(self.notification_group, [f"{message['ip']} rolled {cur_die_roll}", f'You got {result} coin{s}'])
+                    if self.take_money:
+                        notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result} coins form them'])
+                        self.take = result
+                    else:
+                        notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
                     self.node.recieve, 'reciever', latest_message, 'message')
