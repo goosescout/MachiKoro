@@ -5,7 +5,7 @@ ALL_CARDS = {
     'apple_orchard': Card('cards/Apple_Orchard.png', 'Apple Orchard', 'wheat', (10,),
                           ['Get 3 coins', '(On everyone`s turn)'], 3),
     'ranch': Card('cards/Ranch.png', 'Ranch', 'cow', (2,), ['Get 1 coin', '(On everyone`s turn)'], 1),
-    'forest': Card('cards/Forest.png', 'Forest', 'gear', (5,), ['Get 3 coins', '(On everyone`s turn)'], 3),
+    'forest': Card('cards/Forest.png', 'Forest', 'gear', (5,), ['Get 1 coins', '(On everyone`s turn)'], 3),
     'mine': Card('cards/Mine.png', 'Mine', 'gear', (9,), ['Get 5 coins', '(On everyone`s turn)'], 6),
     'bakery': Card('cards/Bakery.png', 'Bakery', 'bread', (2, 3), ['Get 1 coin', '(On your turn only)'], 1),
     'convenience_store': Card('cards/Convenience_Store.png', 'Convenience Store', 'bread', (4,),

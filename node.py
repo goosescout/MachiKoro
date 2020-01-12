@@ -5,8 +5,14 @@ from utility import MyThread, Player, Card
 
 class Node:
     def __init__(self, port=11719):
-        self.ip = socket.gethostbyname(socket.gethostname())
+        self.hostname = socket.gethostname()
+        if "MacBook" in self.hostname:
+            self.ip = '172.20.10.11'
+        else:
+            self.ip = socket.gethostbyname(self.hostname)
+
         self.port = port
+        self.queque = []
         
     def send(self, data, ip=None, **kwargs):
         '''
@@ -20,8 +26,10 @@ class Node:
         for key, value in kwargs.items():
             message[key] = value
         if ip is None:
-            for i in range(256):
-                sock.sendto(bytes(str(message), encoding='utf-8'), (f'192.168.1.{i}', self.port))
+            #to_ip = '.'.join(self.ip.split('.')[:-1])
+            #for i in range(256):
+                #sock.sendto(bytes(str(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
+            sock.sendto(bytes(str(message), encoding='utf-8'), (('172.20.10.3' if "MacBook" in self.hostname else "192.168.43.242"), self.port))
         elif isinstance(ip, list) or isinstance(ip, map):
             for elem in ip:
                 if elem != self.ip:
@@ -33,6 +41,14 @@ class Node:
         '''
         Awaits for any one message and writes it in a variable provided.
         '''
+        if self.queque:
+            message = self.queque.pop()
+            if isinstance(var[key], list):
+                var[key].append(message)
+            else:
+                var[key] = message
+            return message
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
@@ -114,6 +130,8 @@ class Node:
                                 if isinstance(elem[0][elem[1]], list):
                                     elem[0][elem[1]].remove(message[match])
                         stops[i] += 1
+            if 'roll' in message['text']:
+                self.queque.append(message)
             for i in range(len(stops)):
                 if stops[i] != stop_counts[i]:
                     break
