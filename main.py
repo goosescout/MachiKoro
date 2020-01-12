@@ -698,7 +698,9 @@ class Game:
                     elif type_ == 'major' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'TV station':
-                                pass
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        addition += card.get_production()
                             elif card.get_name() == 'Stadium':
                                 if die_roll in card.die_roll:
                                     if player == myself:
@@ -854,15 +856,15 @@ class Game:
                     result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
                     s = 's' if result == 1 else ''
                     if self.take_money:
-                        notification = Notification(self.notification_group, [f'{cur_player} rolled {cur_die_roll}', f'Click on another player to take {result}', 'coins from them'])
+                        notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'Click on another player to take {result}', 'coins from them'])
                     else:
-                        notification = Notification(self.notification_group, [f'{cur_player} rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                        notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
                 elif 'take' in message['text']:
                     player = list(filter(lambda x: x.get_ip() == message['ip'], self.players))[0]
                     victim = list(filter(lambda x: x.get_ip() == message['victim_ip'], self.players))[0]
                     player.money += message['coins']
                     victim.money -= message['coins']
-                    notification = Notification(self.notification_group, [f'{player.get_ip()} took {message["coins"]}', f'from {victim.get_ip()}'])
+                    notification = Notification(self.notification_group, [f'{player.get_ip()} took {message["coins"]} coins', f'from {victim.get_ip()}'])
 
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
