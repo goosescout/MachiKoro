@@ -93,21 +93,40 @@ class TableBlock(pygame.sprite.Sprite):
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
 
-        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (100, 100))
-        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (100, 100))
-        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (100, 100))
-        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (100, 100))
-        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (100, 100))
-        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (100, 100))
-        self.major = pygame.transform.scale(load_image('cards/Major.png'), (100, 100))
-        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (100, 100))
+        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (120, 120))
+        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (120, 120))
+        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (120, 120))
+        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (120, 120))
+        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (120, 120))
+        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (120, 120))
+        self.major = pygame.transform.scale(load_image('cards/Major.png'), (120, 120))
+        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (120, 120))
 
+        self.wheat_rect = self.wheat.get_rect()
+        self.cow_rect = self.cow.get_rect()
+        self.gear_rect = self.gear.get_rect()
+        self.bread_rect = self.bread.get_rect()
+        self.factory_rect = self.factory.get_rect()
+        self.fruit_rect = self.fruit.get_rect()
+        self.cup_rect = self.cup.get_rect()
+        self.major_rect = self.major.get_rect()
+
+        self.wheat_rect.x, self.wheat_rect.y = self.start_x_pos + self.shift_x * 0, self.start_y_pos
+        self.cow_rect.x, self.cow_rect.y = self.start_x_pos + self.shift_x * 1, self.start_y_pos
+        self.gear_rect.x, self.gear_rect.y = self.start_x_pos + self.shift_x * 2, self.start_y_pos
+        self.bread_rect.x, self.bread_rect.y = self.start_x_pos + self.shift_x * 3, self.start_y_pos
+        self.factory_rect.x, self.factory_rect.y = self.start_x_pos + self.shift_x * 4, self.start_y_pos
+        self.fruit_rect.x, self.fruit_rect.y = self.start_x_pos + self.shift_x * 5, self.start_y_pos
+        self.cup_rect.x, self.cup_rect.y = self.start_x_pos + self.shift_x * 6, self.start_y_pos
+        self.major_rect.x, self.major_rect.y = self.start_x_pos + self.shift_x * 7, self.start_y_pos
+
+        '''
         types_ = [self.bread, self.cow, self.cup, self.factory, self.fruit, self.gear, self.major, self.wheat]
 
-        for i, el in enumerate(types_):
-            el.rect = el.get_rect()
-            el.rect.x, el.rect.y = self.start_x_pos + self.shift_x * i, self.start_y_pos
-
+        for i, el in enumerate(types_): 
+            rect = el.get_rect() # попробуй, вдруг так получится
+            rect.x, rect.y = self.start_x_pos + self.shift_x * i, self.start_y_pos
+        '''
 
 class Block:
     def __init__(self, group, block, amount, x, y):
@@ -863,9 +882,9 @@ class Game:
 
             self.block_group.empty()
             for i, type_ in enumerate(myself.cards):
-                c = type_.Counter()
-                for j, block in enumerate(c):
-                    Block(self.block_group, block, type_[block], i, j)
+                counter = Counter(myself.cards[type_])
+                for j, block in enumerate(counter.most_common()):
+                    Block(self.block_group, block[0], block[1], i, j)
 
             update_screen()
             self.players_icon_group.draw(self.screen)

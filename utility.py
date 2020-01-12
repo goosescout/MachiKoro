@@ -82,3 +82,7 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+def autopos(image, x):
+    image.rect = image.get_rect()
+    return image.rect.x, image.rect.y
