@@ -270,7 +270,7 @@ class Game:
             background = pygame.transform.scale(load_image(
                 'background_test.png'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-            logo = pygame.image.load(os.path.join('data', 'logo_blit.png'))
+            logo = pygame.image.load(os.path.join('data', 'logo.png'))
             self.screen.blit(logo, (200, 50))
 
         play = Button(self.buttons_group, 340, 300, 'play')
@@ -440,7 +440,7 @@ class Game:
             background = pygame.transform.scale(load_image(
                 'background_test.png'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-            logo = pygame.image.load(os.path.join('data', 'logo_blit.png'))
+            logo = pygame.image.load(os.path.join('data', 'logo.png'))
             self.screen.blit(logo, (200, 50))
 
         connect = Button(self.buttons_group, 340, 300, 'connect')
