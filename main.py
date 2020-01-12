@@ -268,9 +268,9 @@ class Game:
 
         def update_screen():
             background = pygame.transform.scale(load_image(
-                'background_test.jpg'), (self.WIDTH, self.HEIGHT))
+                'background_test.png'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-            logo = load_image('logo_test.jpg', -1)
+            logo = pygame.image.load(os.path.join('data', 'logo_blit.png'))
             self.screen.blit(logo, (200, 50))
 
         play = Button(self.buttons_group, 340, 300, 'play')
