@@ -101,33 +101,34 @@ class TableBlock(pygame.sprite.Sprite):
         self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (100, 100))
         self.major = pygame.transform.scale(load_image('cards/Major.png'), (100, 100))
         self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (100, 100))
-        '''
-        self.bread_rect = self.bread.get_rect()
-        self.cow_rect = self.cow.get_rect()
-        self.cup_rect = self.cup.get_rect()
-        self.factory_rect = self.factory.get_rect()
-        self.fruit_rect = self.fruit.get_rect()
-        self.gear_rect = self.gear.get_rect()
-        self.major_rect = self.major.get_rect()
-        self.wheat_rect = self.wheat.get_rect()
-        '''
+
         types_ = [self.bread, self.cow, self.cup, self.factory, self.fruit, self.gear, self.major, self.wheat]
 
         for i, el in enumerate(types_):
-            el_rect = el.get_rect()
-            el_rect.rect.x, el_rect.rect.y = self.start_x_pos + self.shift_x * i, self.start_y_pos
+            el.rect = el.get_rect()
+            el.rect.x, el.rect.y = self.start_x_pos + self.shift_x * i, self.start_y_pos
 
-    def update(self, cards):
-        for i, type_ in enumerate(cards):
-            c = type_.Counter()
-            for j, block in enumerate(c):
-                image = pygame.transform.scale(load_image('button.png'), (120, 80))
-                rect = image.get_rect()
-                rect.x, rect.y = (self.start_x_pos + self.shift_x * i, self.start_y_pos + self.shift_y * j)
-                text = self.font.render(f'{block.die_roll} {block.name} {type_[block]}')
-                image.blit(text, (5, 5))
 
-'''
+class Block:
+    def __init__(self, group, block, amount, x, y):
+        super().__init__(group)
+        self.block = block
+        self.card_image = self.block.image
+        self.amount = amount
+        self.image = pygame.transform.scale(load_image('button.png'), (120, 80))
+        self.start_x_pos = 100
+        self.start_y_pos = 600
+        self.shift_x = 150
+        self.shift_y = 80
+        self.image.rect = self.image.get_rect()
+        self.image.rect.x = self.start_x_pos + self.shift_x * x
+        self.image.rect.y = self.start_y_pos + self.shift_y * y
+        self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
+        self.color = pygame.Color('black')
+        text = self.font.render(f'{block.die_roll} {block.name} {amount}', 1, self.color)
+        self.image.blit(text, (5, 5))
+
+
 class BlockNotification:
     def __init__(self, group, card_sprite):
         self.image = pygame.transform.scale(
@@ -151,7 +152,7 @@ class BlockNotification:
         self.rect = self.image.get_rect()
         self.rect.x = 200
         self.rect.y = 200
-'''
+
 
 class ShopCardSprite(pygame.sprite.Sprite):
     def __init__(self, group, card, row, col):
@@ -706,6 +707,7 @@ class Game:
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
         self.block_notification_group = pygame.sprite.Group()
+        self.block_group = pygame.sprite.Group()
         self.table_group = pygame.sprite.Group()
         self.block = TableBlock(self.table_group)
 
@@ -713,7 +715,6 @@ class Game:
             background = pygame.transform.scale(load_image(
                 'background_test.jpg'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
-            self.block.update()
 
         def buy_card(player, card_sprite, is_myself):
             player.get_cards()[card_sprite.card.type].append(card_sprite.card)
@@ -778,12 +779,10 @@ class Game:
                                 if isinstance(elem, Button):
                                     if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                         elem.press()
-                                        '''
                             for elem in self.block_notification_group:
                                 if isinstance(elem, Button):
                                     if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                         elem.press()
-                                        '''
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -817,17 +816,17 @@ class Game:
                                     elif elem == notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.shop_notifications_group.empty()
-                            '''                
-                        for block in self.table_group:
+
+                        for block in self.block_group:
                             if block.rect.collidepoint(pygame.mouse.get_pos()):
-                                block_notification = BlockNotification(self.block_notification_group, хз что передать)
+                                block_notification = BlockNotification(self.block_notification_group, block.card_image)
                         for elem in self.block_notification_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
                                     if elem == block_notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.block_notification_group.empty()
-                            '''
+
                         self.buttons_group.update()
             try:
                 notification.update(myself == cur_player)
@@ -862,12 +861,18 @@ class Game:
                     elem.update(cur_player == elem.player, i)
                     i += 1
 
+            self.block_group.empty()
+            for i, type_ in enumerate(myself.cards):
+                c = type_.Counter()
+                for j, block in enumerate(c):
+                    Block(self.block_group, block, type_[block], i, j)
+
             update_screen()
             self.players_icon_group.draw(self.screen)
             self.shop_group.draw(self.screen)
             self.buttons_group.draw(self.screen)
             self.shop_notifications_group.draw(self.screen)
-            self.table_group.draw(self.screen)
+            self.block_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
             self.clock.tick(self.FPS)
