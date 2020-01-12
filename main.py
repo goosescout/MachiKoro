@@ -546,7 +546,7 @@ class Game:
                                                 ALL_CARDS['tv_station'] + 4 * \
                                                 ALL_CARDS['business_center']
                                             shuffle(self.deck)
-                                            self.node.send('start game', map(lambda x: x.ip, self.players), players=list(
+                                            self.node.send('start game', map(lambda x: x.get_ip(), self.players), players=list(
                                                 map(str, self.players)), deck=list(map(str, self.deck)))
                                             return self.game_screen
 
@@ -594,7 +594,7 @@ class Game:
                     self.players = [
                         Player(player, player == self.node.ip) for player in players]
                     shuffle(self.players)
-                    self.node.send('start game', map(lambda x: x.ip, self.players), players=list(
+                    self.node.send('start game', map(lambda x: x.get_ip(), self.players), players=list(
                         map(str, self.players)), deck=list(map(str, self.deck)))
                     return self.game_screen
                 if counter % 20 == 0:
@@ -633,8 +633,7 @@ class Game:
         self.players_icon_group = pygame.sprite.Group()
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
-        self.take_money = False
-        self.take = 0
+        self.take_money = 0
 
         def update_screen():
             background = pygame.transform.scale(load_image(
@@ -651,14 +650,14 @@ class Game:
                 ), *card_sprite.get_coords())
 
             if is_myself:
-                self.node.send('buy', map(lambda x: x.ip, self.players),
+                self.node.send('buy', map(lambda x: x.get_ip(), self.players),
                                coords=shop_notification.sprite.get_coords())
                 shop_notification.sprite.kill()
                 self.shop_notifications_group.empty()
 
         def trigger_cards(die_roll, cur_player, myself):
             result = 0
-            addition = False
+            addition = 0
             for player in self.players:
                 for type_ in player.get_cards().keys():
                     if type_ in {'wheat', 'cow', 'gear'}:
@@ -677,8 +676,7 @@ class Game:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
                                 if player == myself:
-                                    result += card.get_production()
-                                addition = True
+                                    addition += card.get_production()
                     elif type_ == 'fruit' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
@@ -744,7 +742,7 @@ class Game:
 
             if cur_player == myself and not cur_player.dice_rolled:
                 cur_die_roll = randint(1, 12)
-                self.node.send(f'roll {cur_die_roll}', map(lambda x: x.ip, self.players))
+                self.node.send(f'roll {cur_die_roll}', map(lambda x: x.get_ip(), self.players))
                 cur_player.dice_rolled = True
                 result, _ = trigger_cards(cur_die_roll, cur_player, myself)
                 s = 's' if result == 1 else ''
@@ -775,26 +773,27 @@ class Game:
                     if event.button == 1:
                         if self.take_money:
                                 for icon in self.players_icon_group:
-                                    if icon.rect.collidepoint(pygame.mouse.get_pos()):
-                                        minus = self.take if self.take >= icon.player.money else icon.player.money
+                                    if icon.rect.collidepoint(pygame.mouse.get_pos()) and icon.player != myself:
+                                        minus = self.take_money if self.take_money <= icon.player.money else icon.player.money
                                         icon.player.money -= minus
                                         myself.money += minus
-                                        self.take = 0
-                                        self.take_money = False
+                                        self.take_money = 0
+                                        self.node.send('take', map(lambda x: x.get_ip(), self.players), coins=minus, victim_ip=icon.player.get_ip())
+                                        self.notification_group.empty()
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 if button.unpress():
                                     if button == exit_btn:
                                         self.stop_threads()
                                         self.node.send(
-                                            'exit game', map(lambda x: x.ip, self.players))
+                                            'exit game', map(lambda x: x.get_ip(), self.players))
                                         self.players = []
                                         self.shop_group.empty()
                                         self.players_icon_group.empty()
                                         return self.start_screen
                                     elif button == end_turn:
                                         self.node.send(
-                                            'end turn', map(lambda x: x.ip, self.players))
+                                            'end turn', map(lambda x: x.get_ip(), self.players))
                                         cur_turn += 1
                                         cur_player = self.players[cur_turn % len(self.players)]
                                         cur_player.buy_flag = True
@@ -847,7 +846,7 @@ class Game:
                         self.notification_group.empty()
                         return self.start_screen
                 elif message['text'] == 'buy':
-                    buy_card(list(filter(lambda x: x.ip == message['ip'], self.players))[
+                    buy_card(list(filter(lambda x: x.get_ip() == message['ip'], self.players))[
                              0], list(filter(lambda x: x.get_coords() == message['coords'], self.shop_group))[0], False)
                 elif 'roll' in message['text']:
                     cur_die_roll = int(message['text'].split()[1])
@@ -855,10 +854,16 @@ class Game:
                     result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
                     s = 's' if result == 1 else ''
                     if self.take_money:
-                        notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'Click on a player to take {result}', 'coins from them'])
-                        self.take = result
+                        notification = Notification(self.notification_group, [f'{cur_player} rolled {cur_die_roll}', f'Click on another player to take {result}', 'coins from them'])
                     else:
-                        notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                        notification = Notification(self.notification_group, [f'{cur_player} rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                elif 'take' in message['text']:
+                    player = list(filter(lambda x: x.get_ip() == message['ip'], self.players))[0]
+                    victim = list(filter(lambda x: x.get_ip() == message['victim_ip'], self.players))[0]
+                    player.money += message['coins']
+                    victim.money -= message['coins']
+                    notification = Notification(self.notification_group, [f'{player.get_ip()} took {message["coins"]}', f'from {victim.get_ip()}'])
+
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
                     self.node.recieve, 'reciever', latest_message, 'message')
