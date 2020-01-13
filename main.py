@@ -149,13 +149,13 @@ class Block(pygame.sprite.Sprite):
 
 
 class BlockNotification(pygame.sprite.Sprite):
-    def __init__(self, group, card_sprite):
+    def __init__(self, group, card):
         self.image = pygame.transform.scale(
             load_image('button.png'), (880, 320))
         self.card_image = pygame.transform.scale(
-            load_image(card_sprite.card.get_image()), (180, 270))
+            load_image(card.get_image()), (180, 270))
         self.image.blit(self.card_image, (690, 25))
-        self.card = card_sprite.card
+        self.card = card
 
         text = [self.card.name] + self.card.description
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 45)
@@ -917,7 +917,7 @@ class Game:
                                             self.shop_notifications_group.empty()
                         for block in self.block_group:
                             if block.rect.collidepoint(pygame.mouse.get_pos()):
-                                block_notification = BlockNotification(self.block_notification_group, block.card_image)
+                                block_notification = BlockNotification(self.block_notification_group, block.block)
                         for elem in self.block_notification_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
