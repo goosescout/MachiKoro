@@ -23,7 +23,7 @@ class Player:
         self.ip = ip
         self.host = host
 
-        self.cards = {'wheat': [Card('cards/Wheat_Field.png', 'Wheat Field', 'wheat', (1,), ['Get 1 coin', '(On everyone`s turn)'], 1)], 'cow': [], 'gear': [], 'boat': [],  # add wheat field
+        self.cards = {'wheat': [Card('cards/Wheat_Field.png', 'Wheat Field', 'wheat', (1,), ['Get 1 coin', '(On everyone`s turn)'], 1)], 'cow': [], 'gear': [],  # add wheat field
                       'bread': [Card('cards/Bakery.png', 'Bakery', 'bread', (2, 3), ['Get 1 coin', '(On your turn only)'], 1)], 'factory': [], 'fruit': [],  # add bakery
                       'cup': [],
                       'major': []

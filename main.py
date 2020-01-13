@@ -85,8 +85,8 @@ class ShopNotification(pygame.sprite.Sprite):
 
 class TableBlock(pygame.Surface):
     def __init__(self, surface):
-        self.start_x_pos = 180
-        self.start_y_pos = 550
+        self.start_x_pos = 200
+        self.start_y_pos = 600
         self.shift_x = 105
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
@@ -101,24 +101,24 @@ class TableBlock(pygame.Surface):
         self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (95, 95))
         self.major = pygame.transform.scale(load_image('cards/Major.png'), (95, 95))
 
-        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, 550))
-        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, 550))
-        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, 550))
-        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, 550))
-        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, 550))
-        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, 550))
-        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, 550))
-        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, 550))
+        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, self.start_y_pos))
+        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, self.start_y_pos))
+        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, self.start_y_pos))
+        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, self.start_y_pos))
+        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, self.start_y_pos))
+        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, self.start_y_pos))
+        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, self.start_y_pos))
+        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, self.start_y_pos))
 
     def update(self):
-        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, 550))
-        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, 550))
-        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, 550))
-        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, 550))
-        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, 550))
-        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, 550))
-        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, 550))
-        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, 550))
+        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, self.start_y_pos))
+        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, self.start_y_pos))
+        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, self.start_y_pos))
+        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, self.start_y_pos))
+        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, self.start_y_pos))
+        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, self.start_y_pos))
+        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, self.start_y_pos))
+        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, self.start_y_pos))
 
 
 class Block(pygame.sprite.Sprite):
@@ -128,8 +128,8 @@ class Block(pygame.sprite.Sprite):
         self.card_image = self.block.image
         self.amount = amount
         self.image = pygame.transform.scale(load_image('button.png'), (95, 35))
-        self.start_x_pos = 180
-        self.start_y_pos = 515
+        self.start_x_pos = 200
+        self.start_y_pos = 565
         self.shift_x = 105
         self.shift_y = -40
         self.rect = self.image.get_rect()
@@ -138,7 +138,7 @@ class Block(pygame.sprite.Sprite):
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
         die_roll_list = list(map(str, list(self.block.die_roll)))
-        text = self.font.render(f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)}', 1, self.color)
+        text = self.font.render(f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)} {amount if amount > 1 else ""}', 1, self.color)
         self.image.blit(text, (5, 5))
 
 
@@ -840,6 +840,12 @@ class Game:
                 s = 's' if result == 1 else ''
                 notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coins'])
 
+            self.block_group.empty()
+            for i, type_ in enumerate(myself.cards):
+                counter = Counter([card.name for card in myself.cards[type_]])
+                for j, block in enumerate(counter.most_common()):
+                    Block(self.block_group, myself.cards[type_][j], block[1], i, j)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
@@ -979,12 +985,6 @@ class Game:
                 if elem.player in self.players:
                     elem.update(cur_player == elem.player, i)
                     i += 1
-
-            self.block_group.empty()
-            for i, type_ in enumerate(myself.cards):
-                counter = Counter(myself.cards[type_])
-                for j, block in enumerate(counter.most_common()):
-                    Block(self.block_group, block[0], block[1], i, j)
 
             update_screen()
             self.block.update()
