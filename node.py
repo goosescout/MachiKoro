@@ -6,10 +6,10 @@ from utility import MyThread, Player, Card
 class Node:
     def __init__(self, port=11719):
         self.hostname = socket.gethostname()
-        if "MacBook" in self.hostname:
-            self.ip = '172.20.10.11'
-        else:
-            self.ip = socket.gethostbyname(self.hostname)
+        #if "MacBook" in self.hostname:
+            #self.ip = '172.20.10.11'
+        #else:
+        self.ip = socket.gethostbyname(self.hostname)
 
         self.port = port
         self.queque = []
@@ -26,10 +26,10 @@ class Node:
         for key, value in kwargs.items():
             message[key] = value
         if ip is None:
-            #to_ip = '.'.join(self.ip.split('.')[:-1])
-            #for i in range(256):
-                #sock.sendto(bytes(str(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
-            sock.sendto(bytes(str(message), encoding='utf-8'), (('172.20.10.3' if "MacBook" in self.hostname else "192.168.43.242"), self.port))
+            to_ip = '.'.join(self.ip.split('.')[:-1])
+            for i in range(256):
+                sock.sendto(bytes(str(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
+            #sock.sendto(bytes(str(message), encoding='utf-8'), (('172.20.10.3' if "MacBook" in self.hostname else "192.168.43.242"), self.port))
         elif isinstance(ip, list) or isinstance(ip, map):
             for elem in ip:
                 if elem != self.ip:
