@@ -86,7 +86,7 @@ class ShopNotification(pygame.sprite.Sprite):
 class TableBlock(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
-        self.start_x_pos = 100
+        self.start_x_pos = 180
         self.start_y_pos = 600
         self.shift_x = 150
         self.shift_y = 80
@@ -128,27 +128,27 @@ class TableBlock(pygame.sprite.Sprite):
             rect.x, rect.y = self.start_x_pos + self.shift_x * i, self.start_y_pos
         '''
 
-class Block:
+class Block(pygame.sprite.Sprite):
     def __init__(self, group, block, amount, x, y):
         super().__init__(group)
         self.block = block
         self.card_image = self.block.image
         self.amount = amount
-        self.image = pygame.transform.scale(load_image('button.png'), (120, 80))
-        self.start_x_pos = 100
+        self.image = pygame.transform.scale(load_image('button.png'), (180, 40))
+        self.start_x_pos = 180
         self.start_y_pos = 600
         self.shift_x = 150
         self.shift_y = 80
-        self.image.rect = self.image.get_rect()
-        self.image.rect.x = self.start_x_pos + self.shift_x * x
-        self.image.rect.y = self.start_y_pos + self.shift_y * y
+        self.rect = self.image.get_rect()
+        self.rect.x = self.start_x_pos + self.shift_x * x
+        self.rect.y = self.start_y_pos + self.shift_y * y
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
         text = self.font.render(f'{block.die_roll} {block.name} {amount}', 1, self.color)
         self.image.blit(text, (5, 5))
 
 
-class BlockNotification:
+class BlockNotification(pygame.sprite.Sprite):
     def __init__(self, group, card_sprite):
         self.image = pygame.transform.scale(
             load_image('button.png'), (880, 320))
@@ -541,7 +541,7 @@ class Game:
 
         counter = 0
         flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False,
-                 'players': [{'ip': self.node.ip}], 'game_host': {'ip': '1'},
+                 'players': [{'ip': self.node.ip}, {'ip': '192.168.0.1'}], 'game_host': {'ip': '1'},
                  'game_connected': False,
                  'game_closed': False, 'game_started': {'text': False}}
         while True:
