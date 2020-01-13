@@ -778,59 +778,54 @@ class Game:
                     if event.button == 1:
                         if not self.notification_group:
                             if self.take_money:
-                                    for icon in self.players_icon_group:
-                                        if icon.rect.collidepoint(pygame.mouse.get_pos()) and icon.player != myself:
-                                            minus = self.take_money if self.take_money <= icon.player.money else icon.player.money
-                                            icon.player.money -= minus
-                                            myself.money += minus
-                                            self.take_money = 0
-                                            self.node.send('take', map(lambda x: x.get_ip(), self.players), coins=minus, victim_ip=icon.player.get_ip())
-                                            self.notification_group.empty()
+                                for icon in self.players_icon_group:
+                                    if icon.rect.collidepoint(pygame.mouse.get_pos()) and icon.player != myself:
+                                        minus = self.take_money if self.take_money <= icon.player.money else icon.player.money
+                                        icon.player.money -= minus
+                                        myself.money += minus
+                                        self.take_money = 0
+                                        self.node.send('take', map(lambda x: x.get_ip(), self.players), coins=minus, victim_ip=icon.player.get_ip())
+                                        self.notification_group.empty()
                             for button in self.buttons_group:
-                                if button.rect.collidepoint(pygame.mouse.get_pos()):
-                                    if button.unpress():
-                                        if button == exit_btn:
-                                            self.stop_threads()
-                                            self.node.send(
-                                                'exit game', map(lambda x: x.get_ip(), self.players))
-                                            self.players = []
-                                            self.shop_group.empty()
-                                            self.players_icon_group.empty()
-                                            return self.start_screen
-                                        elif button == end_turn:
-                                            self.node.send(
-                                                'end turn', map(lambda x: x.get_ip(), self.players))
-                                            cur_turn += 1
-                                            cur_player = self.players[cur_turn % len(self.players)]
-                                            cur_player.buy_flag = True
+                                if button.rect.collidepoint(pygame.mouse.get_pos()) and button.unpress():
+                                    if button == exit_btn:
+                                        self.stop_threads()
+                                        self.node.send(
+                                            'exit game', map(lambda x: x.get_ip(), self.players))
+                                        self.players = []
+                                        self.shop_group.empty()
+                                        self.players_icon_group.empty()
+                                        return self.start_screen
+                                    elif button == end_turn:
+                                        self.node.send(
+                                            'end turn', map(lambda x: x.get_ip(), self.players))
+                                        cur_turn += 1
+                                        cur_player = self.players[cur_turn % len(self.players)]
+                                        cur_player.buy_flag = True
                             for card in self.shop_group:
                                 if card.rect.collidepoint(pygame.mouse.get_pos()):
                                     shop_notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
                                                                     cur_player)
                             for elem in self.shop_notifications_group:
                                 if isinstance(elem, Button):
-                                    if elem.unpress():
+                                    if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                         if elem == shop_notification.buy_button:
-                                            if elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                                if shop_notification.is_active and myself.buy_flag:
-                                                    buy_card(
-                                                        myself, shop_notification.sprite, True)
-                                                else:
-                                                    elem.make_inactive()
+                                            if shop_notification.is_active and myself.buy_flag:
+                                                buy_card(
+                                                    myself, shop_notification.sprite, True)
+                                            else:
+                                                elem.make_inactive()
                                         elif elem == shop_notification.close_button:
-                                            if elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                                self.shop_notifications_group.empty()
+                                            self.shop_notifications_group.empty()
                             self.buttons_group.update()
                         else:
                             for elem in self.notification_group:
                                 if isinstance(elem, Button):
-                                    if elem.unpress():
-                                        if elem == notification.button:
-                                            if elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                                self.notification_group.empty()
+                                    if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                        if elem == notification.button: 
+                                            self.notification_group.empty()
                                 else:
-                                    if not elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                        self.notification_group.empty()
+                                    self.notification_group.empty()
             try:
                 shop_notification.update(myself == cur_player)
             except Exception:
