@@ -991,10 +991,10 @@ class Game:
             self.players_icon_group.draw(self.screen)
             self.shop_group.draw(self.screen)
             self.buttons_group.draw(self.screen)
+            self.block_group.draw(self.screen)
             self.notification_group.draw(self.screen)
             self.shop_notifications_group.draw(self.screen)
             self.block_notification_group.draw(self.screen)
-            self.block_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
             self.clock.tick(self.FPS)
