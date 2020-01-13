@@ -87,20 +87,19 @@ class TableBlock(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
         self.start_x_pos = 180
-        self.start_y_pos = 600
-        self.shift_x = 150
-        self.shift_y = 80
+        self.start_y_pos = 550
+        self.shift_x = 180
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
 
-        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (120, 120))
-        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (120, 120))
-        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (120, 120))
-        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (120, 120))
-        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (120, 120))
-        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (120, 120))
-        self.major = pygame.transform.scale(load_image('cards/Major.png'), (120, 120))
-        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (120, 120))
+        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (180, 180))
+        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (180, 180))
+        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (180, 180))
+        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (180, 180))
+        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (180, 180))
+        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (180, 180))
+        self.major = pygame.transform.scale(load_image('cards/Major.png'), (180, 180))
+        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (180, 180))
 
         self.wheat_rect = self.wheat.get_rect()
         self.cow_rect = self.cow.get_rect()
@@ -136,9 +135,9 @@ class Block(pygame.sprite.Sprite):
         self.amount = amount
         self.image = pygame.transform.scale(load_image('button.png'), (180, 40))
         self.start_x_pos = 180
-        self.start_y_pos = 600
-        self.shift_x = 150
-        self.shift_y = 80
+        self.start_y_pos = 550
+        self.shift_x = 180
+        self.shift_y = -40
         self.rect = self.image.get_rect()
         self.rect.x = self.start_x_pos + self.shift_x * x
         self.rect.y = self.start_y_pos + self.shift_y * y
@@ -150,6 +149,7 @@ class Block(pygame.sprite.Sprite):
 
 class BlockNotification(pygame.sprite.Sprite):
     def __init__(self, group, card):
+        super().__init__(group)
         self.image = pygame.transform.scale(
             load_image('button.png'), (880, 320))
         self.card_image = pygame.transform.scale(
@@ -997,6 +997,7 @@ class Game:
             self.buttons_group.draw(self.screen)
             self.notification_group.draw(self.screen)
             self.shop_notifications_group.draw(self.screen)
+            self.block_notification_group.draw(self.screen)
             self.block_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
