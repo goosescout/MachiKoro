@@ -83,49 +83,43 @@ class ShopNotification(pygame.sprite.Sprite):
             self.buy_button.make_inactive()
 
 
-class TableBlock(pygame.sprite.Sprite):
-    def __init__(self, group):
-        super().__init__(group)
+class TableBlock(pygame.Surface):
+    def __init__(self, surface):
         self.start_x_pos = 180
         self.start_y_pos = 550
-        self.shift_x = 180
+        self.shift_x = 105
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
+        self.surface = surface
 
-        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (180, 180))
-        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (180, 180))
-        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (180, 180))
-        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (180, 180))
-        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (180, 180))
-        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (180, 180))
-        self.major = pygame.transform.scale(load_image('cards/Major.png'), (180, 180))
-        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (180, 180))
+        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (95, 95))
+        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (95, 95))
+        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (95, 95))
+        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (95, 95))
+        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (95, 95))
+        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (95, 95))
+        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (95, 95))
+        self.major = pygame.transform.scale(load_image('cards/Major.png'), (95, 95))
 
-        self.wheat_rect = self.wheat.get_rect()
-        self.cow_rect = self.cow.get_rect()
-        self.gear_rect = self.gear.get_rect()
-        self.bread_rect = self.bread.get_rect()
-        self.factory_rect = self.factory.get_rect()
-        self.fruit_rect = self.fruit.get_rect()
-        self.cup_rect = self.cup.get_rect()
-        self.major_rect = self.major.get_rect()
+        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, 550))
+        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, 550))
+        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, 550))
+        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, 550))
+        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, 550))
+        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, 550))
+        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, 550))
+        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, 550))
 
-        self.wheat_rect.x, self.wheat_rect.y = self.start_x_pos + self.shift_x * 0, self.start_y_pos
-        self.cow_rect.x, self.cow_rect.y = self.start_x_pos + self.shift_x * 1, self.start_y_pos
-        self.gear_rect.x, self.gear_rect.y = self.start_x_pos + self.shift_x * 2, self.start_y_pos
-        self.bread_rect.x, self.bread_rect.y = self.start_x_pos + self.shift_x * 3, self.start_y_pos
-        self.factory_rect.x, self.factory_rect.y = self.start_x_pos + self.shift_x * 4, self.start_y_pos
-        self.fruit_rect.x, self.fruit_rect.y = self.start_x_pos + self.shift_x * 5, self.start_y_pos
-        self.cup_rect.x, self.cup_rect.y = self.start_x_pos + self.shift_x * 6, self.start_y_pos
-        self.major_rect.x, self.major_rect.y = self.start_x_pos + self.shift_x * 7, self.start_y_pos
+    def update(self):
+        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, 550))
+        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, 550))
+        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, 550))
+        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, 550))
+        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, 550))
+        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, 550))
+        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, 550))
+        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, 550))
 
-        '''
-        types_ = [self.bread, self.cow, self.cup, self.factory, self.fruit, self.gear, self.major, self.wheat]
-
-        for i, el in enumerate(types_): 
-            rect = el.get_rect() # попробуй, вдруг так получится
-            rect.x, rect.y = self.start_x_pos + self.shift_x * i, self.start_y_pos
-        '''
 
 class Block(pygame.sprite.Sprite):
     def __init__(self, group, block, amount, x, y):
@@ -133,17 +127,18 @@ class Block(pygame.sprite.Sprite):
         self.block = block
         self.card_image = self.block.image
         self.amount = amount
-        self.image = pygame.transform.scale(load_image('button.png'), (180, 40))
+        self.image = pygame.transform.scale(load_image('button.png'), (95, 35))
         self.start_x_pos = 180
-        self.start_y_pos = 550
-        self.shift_x = 180
+        self.start_y_pos = 515
+        self.shift_x = 105
         self.shift_y = -40
         self.rect = self.image.get_rect()
         self.rect.x = self.start_x_pos + self.shift_x * x
         self.rect.y = self.start_y_pos + self.shift_y * y
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
-        text = self.font.render(f'{block.die_roll} {block.name} {amount}', 1, self.color)
+        die_roll_list = list(map(str, list(self.block.die_roll)))
+        text = self.font.render(f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)}', 1, self.color)
         self.image.blit(text, (5, 5))
 
 
@@ -727,7 +722,7 @@ class Game:
         self.block_notification_group = pygame.sprite.Group()
         self.block_group = pygame.sprite.Group()
         self.table_group = pygame.sprite.Group()
-        self.block = TableBlock(self.table_group)
+        self.block = TableBlock(self.screen)
         self.take_money = 0
 
         def update_screen():
@@ -992,6 +987,7 @@ class Game:
                     Block(self.block_group, block[0], block[1], i, j)
 
             update_screen()
+            self.block.update()
             self.players_icon_group.draw(self.screen)
             self.shop_group.draw(self.screen)
             self.buttons_group.draw(self.screen)
