@@ -657,14 +657,13 @@ class Game:
 
         def trigger_cards(die_roll, cur_player, myself):
             result = 0
-            addition = 0
             for player in self.players:
                 for type_ in player.get_cards().keys():
                     if type_ == 'cup' and cur_player != player:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
                                 if player == myself:
-                                    addition += card.get_production()
+                                    take_money(card.get_production())
                     elif type_ in {'wheat', 'cow', 'gear'}:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
@@ -712,44 +711,89 @@ class Game:
                             else:  # Business Center
                                 pass
 
-            return result, addition
+            return result
 
+        def take_money(amount):
+            notification = Notification(self.notification_group, [f'Click on another player to take {amount}', 'coins from them'])
+            self.take_money = True
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.terminate()
 
-        notification = Notification(self.notification_group, ('test'))
+                    if event.type == pygame.MOUSEMOTION:
+                        self.cursor_group.update()
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            for elem in self.notification_group:
+                                if isinstance(elem, Button):
+                                    if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                        elem.press()
+
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        if event.button == 1:
+                            if self.take_money:
+                                for icon in self.players_icon_group:
+                                    if icon.rect.collidepoint(pygame.mouse.get_pos()) and icon.player != self.myself:
+                                        minus = amount if amount <= icon.player.money else icon.player.money
+                                        icon.player.money -= minus
+                                        self.myself.money += minus
+                                        self.take_money = False
+                                        self.node.send('take', map(lambda x: x.get_ip(), self.players), coins=minus, victim_ip=icon.player.get_ip())
+                                        self.notification_group.empty()
+                                        return
+
+                            for elem in self.notification_group:
+                                if isinstance(elem, Button):
+                                    if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                        if elem == notification.button: 
+                                            self.notification_group.empty()
+                
+                update_screen()
+                self.players_icon_group.draw(self.screen)
+                self.shop_group.draw(self.screen)
+                self.buttons_group.draw(self.screen)
+                self.notification_group.draw(self.screen)
+                self.shop_notifications_group.draw(self.screen)
+                if pygame.mouse.get_focused():
+                    self.cursor_group.draw(self.screen)
+                self.clock.tick(self.FPS)
+                pygame.display.flip()
 
         for x in range(5):
             for y in range(3):
                 ShopCardSprite(self.shop_group, self.deck.pop(), x, y)
 
-        myself = list(filter(lambda x: x.get_ip() ==
-                             self.node.ip, self.players))[0]
+        self.myself = list(filter(lambda x: x.get_ip() ==
+                                  self.node.ip, self.players))[0]
 
         for i, player in enumerate(self.players):
             PlayerIcon(self.players_icon_group, i ==
-                       0, myself == player, player, i)
+                       0, self.myself == player, player, i)
 
         exit_btn = Button(self.buttons_group, 20, 650,
                           'exit', (150, 50), fontsize=50)
         end_turn = Button(self.buttons_group, 1060, 650, 'end turn',
-                          (200, 50), fontsize=50) if self.players[0] == myself else None
+                          (200, 50), fontsize=50) if self.players[0] == self.myself else None
 
         cur_turn = 0
 
         while True:
             cur_player = self.players[cur_turn % len(self.players)]
-            if cur_player != myself and end_turn is not None:
+            if cur_player != self.myself and end_turn is not None:
                 self.buttons_group.remove(end_turn)
                 end_turn.kill()
                 end_turn = None
-            elif cur_player == myself and end_turn is None:
+            elif cur_player == self.myself and end_turn is None:
                 end_turn = Button(self.buttons_group, 1060,
                                   650, 'end turn', (200, 50), fontsize=50)
 
-            if cur_player == myself and not cur_player.dice_rolled:
+            if cur_player == self.myself and not cur_player.dice_rolled:
                 cur_die_roll = randint(1, 12)
                 self.node.send(f'roll {cur_die_roll}', map(lambda x: x.get_ip(), self.players))
                 cur_player.dice_rolled = True
-                result, _ = trigger_cards(cur_die_roll, cur_player, myself)
+                result = trigger_cards(cur_die_roll, cur_player, self.myself)
                 s = 's' if result == 1 else ''
                 notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coins'])
 
@@ -777,15 +821,6 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         if not self.notification_group:
-                            if self.take_money:
-                                for icon in self.players_icon_group:
-                                    if icon.rect.collidepoint(pygame.mouse.get_pos()) and icon.player != myself:
-                                        minus = self.take_money if self.take_money <= icon.player.money else icon.player.money
-                                        icon.player.money -= minus
-                                        myself.money += minus
-                                        self.take_money = 0
-                                        self.node.send('take', map(lambda x: x.get_ip(), self.players), coins=minus, victim_ip=icon.player.get_ip())
-                                        self.notification_group.empty()
                             for button in self.buttons_group:
                                 if button.rect.collidepoint(pygame.mouse.get_pos()) and button.unpress():
                                     if button == exit_btn:
@@ -804,15 +839,15 @@ class Game:
                                         cur_player.buy_flag = True
                             for card in self.shop_group:
                                 if card.rect.collidepoint(pygame.mouse.get_pos()):
-                                    shop_notification = ShopNotification(self.shop_notifications_group, card, myself, myself ==
+                                    shop_notification = ShopNotification(self.shop_notifications_group, card, self.myself, self.myself ==
                                                                     cur_player)
                             for elem in self.shop_notifications_group:
                                 if isinstance(elem, Button):
                                     if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                         if elem == shop_notification.buy_button:
-                                            if shop_notification.is_active and myself.buy_flag:
+                                            if shop_notification.is_active and self.myself.buy_flag:
                                                 buy_card(
-                                                    myself, shop_notification.sprite, True)
+                                                    self.myself, shop_notification.sprite, True)
                                             else:
                                                 elem.make_inactive()
                                         elif elem == shop_notification.close_button:
@@ -827,7 +862,7 @@ class Game:
                                 else:
                                     self.notification_group.empty()
             try:
-                shop_notification.update(myself == cur_player)
+                shop_notification.update(self.myself == cur_player)
             except Exception:
                 pass
 
@@ -853,14 +888,12 @@ class Game:
                     buy_card(list(filter(lambda x: x.get_ip() == message['ip'], self.players))[
                              0], list(filter(lambda x: x.get_coords() == message['coords'], self.shop_group))[0], False)
                 elif 'roll' in message['text']:
+                    notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
-                    result, self.take_money = trigger_cards(cur_die_roll, cur_player, myself)
+                    result = trigger_cards(cur_die_roll, cur_player, self.myself)
                     s = 's' if result == 1 else ''
-                    if self.take_money:
-                        notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'Click on another player to take {result}', 'coins from them'])
-                    else:
-                        notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                    notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
                 elif 'take' in message['text']:
                     player = list(filter(lambda x: x.get_ip() == message['ip'], self.players))[0]
                     victim = list(filter(lambda x: x.get_ip() == message['victim_ip'], self.players))[0]
