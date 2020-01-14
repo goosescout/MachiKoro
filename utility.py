@@ -29,13 +29,13 @@ class Player:
                       'major': []
                       }
         self.landmarks = {
-            'station': Landmark('crads/Station.png', 'crads/Station_WB.png', 'Station', 'You may roll 2 dice', 4),
-            'mall': Landmark('crads/Shopping_Mall.png', 'crads/Shopping_Mall_WB.png', 'Shopping_Mall',
-                             'Earn +1 coin from your own cup and bread establishments', 10),
-            'park': Landmark('crads/Amusement_Park.png', 'crads/Amusement_Park_WB.png', 'Amusement_Park',
-                             'If you roll matching dice, take another turn after this one', 16),
-            'tower': Landmark('crads/Radio_Tower.png', 'crads/Radio_Tower_WB.png', 'Radio Tower',
-                              'Once every turn, you can choose to re-roll your dice', 22),
+            'station': Landmark('landmarks/Station.png', 'landmarks/Station_WB.png', 'Station', ['You may roll 2 dice'], 4),
+            'mall': Landmark('landmarks/Shopping_Mall.png', 'landmarks/Shopping_Mall_WB.png', 'Shopping Mall',
+                             ['Earn +1 coin from your own cup', 'and bread establishments'], 10),
+            'park': Landmark('landmarks/Amusement_Park.png', 'landmarks/Amusement_Park_WB.png', 'Amusement Park',
+                             ['If you roll matching dice, take', 'another turn after this one'], 16),
+            'tower': Landmark('landmarks/Radio_Tower.png', 'landmarks/Radio_Tower_WB.png', 'Radio Tower',
+                              ['Once every turn, you can', 'choose to re-roll your dice'], 22),
         }
         self.money = 3
         self.buy_flag = True
@@ -116,3 +116,9 @@ class Landmark:
     def build(self):
         self.image = self.image_clr
         self.is_active = True
+
+    def get_image(self):
+        return self.image
+
+    def get_name(self):
+        return self.name
