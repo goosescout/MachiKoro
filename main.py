@@ -184,6 +184,11 @@ class ShopCardSprite(pygame.sprite.Sprite):
         return self.row, self.col
 
 
+class Landmark(pygame.sprite.Sprite):
+    def __init__(self):
+        pass
+
+
 class PlayerIcon(pygame.sprite.Sprite):
     def __init__(self, group, is_active, is_myself, player, count, font='data/DisposableDroidBB.ttf'):
         self.player = player

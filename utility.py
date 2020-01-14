@@ -28,7 +28,15 @@ class Player:
                       'cup': [],
                       'major': []
                       }
-        self.landmarks = ['Something']
+        self.landmarks = {
+            'station': Landmark('crads/Station.png', 'crads/Station_WB.png', 'Station', 'You may roll 2 dice', 4),
+            'mall': Landmark('crads/Shopping_Mall.png', 'crads/Shopping_Mall_WB.png', 'Shopping_Mall',
+                             'Earn +1 coin from your own cup and bread establishments', 10),
+            'park': Landmark('crads/Amusement_Park.png', 'crads/Amusement_Park_WB.png', 'Amusement_Park',
+                             'If you roll matching dice, take another turn after this one', 16),
+            'tower': Landmark('crads/Radio_Tower.png', 'crads/Radio_Tower_WB.png', 'Radio Tower',
+                              'Once every turn, you can choose to re-roll your dice', 22),
+        }
         self.money = 3
         self.buy_flag = True
         self.dice_rolled = False
@@ -91,6 +99,20 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
-def autopos(image, x):
-    image.rect = image.get_rect()
-    return image.rect.x, image.rect.y
+
+class Landmark:
+    def __init__(self, image, image_wb, name, description, cost, is_active=False):
+        self.image_wb = image_wb
+        self.image_clr = image
+        if is_active:
+            self.image = self.image_clr
+        else:
+            self.image = self.image_wb
+        self.name = name
+        self.description = description
+        self.cost = cost
+        self.is_active = is_active
+
+    def build(self):
+        self.image = self.image_clr
+        self.is_active = True
