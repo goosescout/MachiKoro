@@ -342,7 +342,10 @@ class Game:
         self.clock = pygame.time.Clock()
         self.node = Node()
 
-        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT)) # , pygame.FULLSCREEN)
+        if 'MacBook' in self.node.hostname:
+            self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        else:
+            self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.FULLSCREEN)
 
         self.cursor_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
@@ -878,6 +881,9 @@ class Game:
         end_turn = Button(self.buttons_group, 1060, 650, 'end turn',
                           (200, 50), fontsize=50) if self.players[0] == self.myself else None
 
+        for i, key in enumerate(self.myself.landmarks):
+                LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
+
         cur_turn = 0
 
         while True:
@@ -891,7 +897,7 @@ class Game:
                                   650, 'end turn', (200, 50), fontsize=50)
 
             if cur_player == self.myself and not cur_player.dice_rolled:
-                cur_die_roll = randint(1, 12)
+                cur_die_roll = randint(1, 2)
                 self.node.send(f'roll {cur_die_roll}', map(lambda x: x.get_ip(), self.players))
                 cur_player.dice_rolled = True
                 result = trigger_cards(cur_die_roll, cur_player, self.myself)
@@ -902,10 +908,7 @@ class Game:
             for i, type_ in enumerate(self.myself.cards):
                 counter = Counter([card.name for card in self.myself.cards[type_]])
                 for j, block in enumerate(counter.most_common()):
-                    Block(self.block_group, self.myself.cards[type_][j], block[1], i, j)
-
-            for i, key in enumerate(self.myself.landmarks):
-                LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
+                    Block(self.block_group, self.myself.cards[type_][j], block[1], i, j)            
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
