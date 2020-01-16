@@ -29,12 +29,12 @@ class Player:
                       'major': []
                       }
         self.landmarks = {
-            'station': Landmark('landmarks/Station.png', 'landmarks/Station_WB.png', 'Station', ['You may roll 2 dice'], 4),
-            'mall': Landmark('landmarks/Shopping_Mall.png', 'landmarks/Shopping_Mall_WB.png', 'Shopping Mall',
+            'station': Landmark('landmarks/Station.png', 'landmarks/Station_WB.png', 'Station', 'station', ['You may roll 2 dice'], 4),
+            'mall': Landmark('landmarks/Shopping_Mall.png', 'landmarks/Shopping_Mall_WB.png', 'Shopping Mall', 'mall',
                              ['Earn +1 coin from your own cup', 'and bread establishments'], 10),
-            'park': Landmark('landmarks/Amusement_Park.png', 'landmarks/Amusement_Park_WB.png', 'Amusement Park',
+            'park': Landmark('landmarks/Amusement_Park.png', 'landmarks/Amusement_Park_WB.png', 'Amusement Park','park',
                              ['If you roll matching dice, take', 'another turn after this one'], 16),
-            'tower': Landmark('landmarks/Radio_Tower.png', 'landmarks/Radio_Tower_WB.png', 'Radio Tower',
+            'tower': Landmark('landmarks/Radio_Tower.png', 'landmarks/Radio_Tower_WB.png', 'Radio Tower', 'tower',
                               ['Once every turn, you can', 'choose to re-roll your dice'], 22),
         }
         self.money = 3
@@ -101,7 +101,7 @@ def load_image(name, colorkey=None):
 
 
 class Landmark:
-    def __init__(self, image, image_wb, name, description, cost, is_active=False):
+    def __init__(self, image, image_wb, name, short_name, description, cost, is_active=False):
         self.image_wb = image_wb
         self.image_clr = image
         if is_active:
@@ -112,6 +112,7 @@ class Landmark:
         self.description = description
         self.cost = cost
         self.is_active = is_active
+        self.short_name = short_name
 
     def build(self):
         self.image = self.image_clr

@@ -8,7 +8,7 @@ from random import shuffle, randint
 import pygame
 
 from node import Node
-from utility import MyThread, Player, load_image, Card
+from utility import MyThread, Player, load_image, Card, Landmark
 from cards import ALL_CARDS
 
 
@@ -759,6 +759,19 @@ class Game:
                 shop_notification.sprite.kill()
                 self.shop_notifications_group.empty()
 
+        def build(player, landmark_sprite, is_myself):
+            player.get_landmarks()[landmark_sprite.card.short_name].build()
+            player.money -= landmark_sprite.card.cost
+            player.buy_flag = False
+
+            if is_myself:
+                # something about node
+                shop_notification.sprite.kill()
+                self.shop_notifications_group.empty()
+
+            for i, key in enumerate(self.myself.landmarks):
+                LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
+
         def trigger_cards(die_roll, cur_player, myself):
             result = 0
             for player in self.players:
@@ -969,8 +982,10 @@ class Game:
                                     if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                         if elem == shop_notification.buy_button:
                                             if shop_notification.is_active and self.myself.buy_flag:
-                                                buy_card(
-                                                    self.myself, shop_notification.sprite, True)
+                                                if isinstance(shop_notification.card, Card):
+                                                    buy_card(self.myself, shop_notification.sprite, True)
+                                                elif isinstance(shop_notification.card, Landmark):
+                                                    build(self.myself, shop_notification.sprite, True)
                                             else:
                                                 elem.make_inactive()
                                         elif elem == shop_notification.close_button:
