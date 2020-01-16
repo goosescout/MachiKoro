@@ -83,7 +83,7 @@ class ShopNotification(pygame.sprite.Sprite):
             self.buy_button.make_inactive()
 
 
-class Table(pygame.Surface):
+class Table:
     def __init__(self, surface):
         self.start_x_pos = 200
         self.start_y_pos = 600
