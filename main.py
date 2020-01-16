@@ -915,7 +915,7 @@ class Game:
                 cur_player.dice_rolled = True
                 result = trigger_cards(cur_die_roll, cur_player, self.myself)
                 s = '' if result == 1 else 's'
-                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coins'])
+                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
 
             self.block_group.empty()
             for i, type_ in enumerate(self.myself.cards):
