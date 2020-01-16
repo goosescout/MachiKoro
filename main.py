@@ -138,7 +138,7 @@ class Block(pygame.sprite.Sprite):
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
         die_roll_list = list(map(str, list(self.block.die_roll)))
-        text = self.font.render(f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)} {amount if amount > 1 else ""}', 1, self.color)
+        text = self.font.render(f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)} {f"({amount})" if amount > 1 else ""}', 1, self.color)
         self.image.blit(text, (5, 5))
 
 
@@ -215,7 +215,7 @@ class PlayerIcon(pygame.sprite.Sprite):
             f': {self.player.get_money()}', 1, pygame.Color('black'))
         self.image.blit(line, (75, 65))
         line = self.font.render(
-            f': {len(self.player.get_landmarks())}', 1, pygame.Color('black'))
+            f': {len(self.player.get_active_landmarks())}', 1, pygame.Color('black'))
         self.image.blit(line, (215, 65))
         line = self.font.render(self.player.get_ip(
         ) if not self.is_myself else 'me', 1, pygame.Color('black'))
@@ -235,7 +235,7 @@ class PlayerIcon(pygame.sprite.Sprite):
             f': {self.player.get_money()}', 1, pygame.Color('black'))
         self.image.blit(line, (75, 65))
         line = self.font.render(
-            f': {len(self.player.get_landmarks())}', 1, pygame.Color('black'))
+            f': {len(self.player.get_active_landmarks())}', 1, pygame.Color('black'))
         self.image.blit(line, (215, 65))
         line = self.font.render(self.player.get_ip(
         ) if not self.is_myself else 'me', 1, pygame.Color('black'))
@@ -549,7 +549,7 @@ class Game:
 
         counter = 0
         flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False,
-                 'players': [{'ip': self.node.ip}, {'ip': '192.168.0.1'}], 'game_host': {'ip': '1'},
+                 'players': [{'ip': self.node.ip}], 'game_host': {'ip': '1'},
                  'game_connected': False,
                  'game_closed': False, 'game_started': {'text': False}}
         while True:

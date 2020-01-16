@@ -35,7 +35,7 @@ class Player:
             'park': Landmark('landmarks/Amusement_Park.png', 'landmarks/Amusement_Park_WB.png', 'Amusement Park','park',
                              ['If you roll matching dice, take', 'another turn after this one'], 16),
             'tower': Landmark('landmarks/Radio_Tower.png', 'landmarks/Radio_Tower_WB.png', 'Radio Tower', 'tower',
-                              ['Once every turn, you can', 'choose to re-roll your dice'], 22),
+                              ['Once every turn, you can', 'choose to re-roll your dice'], 22)
         }
         self.money = 3
         self.buy_flag = True
@@ -52,6 +52,9 @@ class Player:
 
     def get_landmarks(self):
         return self.landmarks
+    
+    def get_active_landmarks(self):
+        return list(filter(lambda x: x.get_active(), self.landmarks.values()))
 
     def get_money(self):
         return self.money
@@ -79,25 +82,10 @@ class Card:
         return [copy.copy(self) for _ in range(num)]
 
     def __str__(self):
-        #return f'Card("{self.image}", "{self.name}", "{self.type}", "{self.die_roll}", "{self.description}", "{self.cost}")'
         return self.name.lower().replace(' ', '_') if self.name != 'Fruit and Vegetable Market' else 'market'
 
     def get_production(self):
         return int(self.description[0].split()[1])
-
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    image = pygame.image.load(fullname).convert()
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-            image.set_colorkey(colorkey)
-        if colorkey == -2:
-            colorkey = image.get_at((image.get_rect().width - 1, image.get_rect().height - 1))
-            image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
 
 
 class Landmark:
@@ -123,3 +111,21 @@ class Landmark:
 
     def get_name(self):
         return self.name
+
+    def get_active(self):
+        return self.is_active
+
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    image = pygame.image.load(fullname).convert()
+    if colorkey is not None:
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+            image.set_colorkey(colorkey)
+        if colorkey == -2:
+            colorkey = image.get_at((image.get_rect().width - 1, image.get_rect().height - 1))
+            image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
