@@ -801,15 +801,26 @@ class Game:
                 self.shop_notifications_group.empty()
 
         def build(player, landmark_sprite, is_myself):
-            player.get_landmarks()[landmark_sprite.card.short_name].build()
-            player.money -= landmark_sprite.card.cost
-            player.buy_flag = False
+            if isinstance(landmark_sprite, Landmark):
+                player.get_landmarks()[landmark_sprite.short_name].build()
+                player.money -= landmark_sprite.cost
+                player.buy_flag = False
 
-            if is_myself:
-                self.node.send('landmark', map(
-                    lambda x: x.get_ip(), self.players), name=landmark_sprite.card.short_name)
-                shop_notification.sprite.kill()
-                self.shop_notifications_group.empty()
+                if is_myself:
+                    self.node.send('landmark', map(
+                        lambda x: x.get_ip(), self.players), name=landmark_sprite.short_name)
+                    shop_notification.sprite.kill()
+                    self.shop_notifications_group.empty()
+            else:
+                player.get_landmarks()[landmark_sprite.card.short_name].build()
+                player.money -= landmark_sprite.card.cost
+                player.buy_flag = False
+
+                if is_myself:
+                    self.node.send('landmark', map(
+                        lambda x: x.get_ip(), self.players), name=landmark_sprite.card.short_name)
+                    shop_notification.sprite.kill()
+                    self.shop_notifications_group.empty()
 
             for i, key in enumerate(self.myself.landmarks):
                 LandmarkSprite(self.landmark_group,
