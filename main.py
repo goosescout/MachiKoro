@@ -1016,7 +1016,7 @@ class Game:
                                   650, 'end turn', (200, 50), fontsize=50)
 
             if cur_player == self.myself and not cur_player.dice_rolled:
-                self.myself.can_reroll() = True
+                self.myself.reroll = True
                 if not self.myself.get_landmarks()['station'].get_active():
                     cur_die_roll, notification = dice_roll(1, cur_player)
                 else:
