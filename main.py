@@ -1018,7 +1018,7 @@ class Game:
             if cur_player == self.myself and not cur_player.dice_rolled:
                 self.myself.reroll = True
                 if not self.myself.get_landmarks()['station'].get_active():
-                    cur_die_roll, notification = dice_roll(1, cur_player)
+                    cur_die_roll, notification = dice_roll(1)
                 else:
                     notification = DieRollNotification(
                         self.roll_notification_group, ('How many dice you', 'want to roll?'))
