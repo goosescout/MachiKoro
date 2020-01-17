@@ -30,8 +30,8 @@ class Notification(pygame.sprite.Sprite):
             line = self.font.render(line, 1, color)
             self.image.blit(line, (20, shift * (i + 1)))
 
-        self.button = Button(group, 910, 450, 'close',
-                             size=(150, 50), fontsize=50)
+        self.close_button = Button(group, 910, 450, 'close',
+                                   size=(150, 50), fontsize=50)
         self.add_button = Button(group, 740, 450, add_button, size=(
             150, 50), fontsize=50) if add_button is not None else None
 
@@ -43,6 +43,16 @@ class Notification(pygame.sprite.Sprite):
             for i, line in enumerate(kwargs['text']):
                 line = self.font.render(line, 1, self.color)
                 self.image.blit(line, (20, shift * (i + 1)))
+
+
+class DieRollNotification(Notification):
+    def __init__(self, group, text, **kwargs):
+        group.empty()
+        super().__init__(group, text, **kwargs)
+        self.close_button = Button(group, 910, 450, 'roll 1',
+                                   size=(150, 50), fontsize=50)
+        self.add_button = Button(group, 740, 450, 'roll 2', size=(
+            150, 50), fontsize=50)
 
 
 class ShopNotification(pygame.sprite.Sprite):
@@ -92,33 +102,57 @@ class Table:
         self.color = pygame.Color('black')
         self.surface = surface
 
-        self.wheat = pygame.transform.scale(load_image('cards/Wheat.png'), (95, 95))
-        self.cow = pygame.transform.scale(load_image('cards/Cow.png'), (95, 95))
-        self.gear = pygame.transform.scale(load_image('cards/Gear.png'), (95, 95))
-        self.bread = pygame.transform.scale(load_image('cards/Bread.png'), (95, 95))
-        self.factory = pygame.transform.scale(load_image('cards/Factory.png'), (95, 95))
-        self.fruit = pygame.transform.scale(load_image('cards/Fruit.png'), (95, 95))
-        self.cup = pygame.transform.scale(load_image('cards/Cup.png'), (95, 95))
-        self.major = pygame.transform.scale(load_image('cards/Major.png'), (95, 95))
+        self.wheat = pygame.transform.scale(
+            load_image('cards/Wheat.png'), (95, 95))
+        self.cow = pygame.transform.scale(
+            load_image('cards/Cow.png'), (95, 95))
+        self.gear = pygame.transform.scale(
+            load_image('cards/Gear.png'), (95, 95))
+        self.bread = pygame.transform.scale(
+            load_image('cards/Bread.png'), (95, 95))
+        self.factory = pygame.transform.scale(
+            load_image('cards/Factory.png'), (95, 95))
+        self.fruit = pygame.transform.scale(
+            load_image('cards/Fruit.png'), (95, 95))
+        self.cup = pygame.transform.scale(
+            load_image('cards/Cup.png'), (95, 95))
+        self.major = pygame.transform.scale(
+            load_image('cards/Major.png'), (95, 95))
 
-        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, self.start_y_pos))
-        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, self.start_y_pos))
-        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, self.start_y_pos))
-        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, self.start_y_pos))
-        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, self.start_y_pos))
-        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, self.start_y_pos))
-        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, self.start_y_pos))
-        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, self.start_y_pos))
+        self.surface.blit(self.wheat, (self.start_x_pos +
+                                       self.shift_x * 0, self.start_y_pos))
+        self.surface.blit(self.cow, (self.start_x_pos +
+                                     self.shift_x * 1, self.start_y_pos))
+        self.surface.blit(self.gear, (self.start_x_pos +
+                                      self.shift_x * 2, self.start_y_pos))
+        self.surface.blit(self.bread, (self.start_x_pos +
+                                       self.shift_x * 3, self.start_y_pos))
+        self.surface.blit(self.factory, (self.start_x_pos +
+                                         self.shift_x * 4, self.start_y_pos))
+        self.surface.blit(self.fruit, (self.start_x_pos +
+                                       self.shift_x * 5, self.start_y_pos))
+        self.surface.blit(self.cup, (self.start_x_pos +
+                                     self.shift_x * 6, self.start_y_pos))
+        self.surface.blit(self.major, (self.start_x_pos +
+                                       self.shift_x * 7, self.start_y_pos))
 
     def update(self):
-        self.surface.blit(self.wheat, (self.start_x_pos + self.shift_x * 0, self.start_y_pos))
-        self.surface.blit(self.cow, (self.start_x_pos + self.shift_x * 1, self.start_y_pos))
-        self.surface.blit(self.gear, (self.start_x_pos + self.shift_x * 2, self.start_y_pos))
-        self.surface.blit(self.bread, (self.start_x_pos + self.shift_x * 3, self.start_y_pos))
-        self.surface.blit(self.factory, (self.start_x_pos + self.shift_x * 4, self.start_y_pos))
-        self.surface.blit(self.fruit, (self.start_x_pos + self.shift_x * 5, self.start_y_pos))
-        self.surface.blit(self.cup, (self.start_x_pos + self.shift_x * 6, self.start_y_pos))
-        self.surface.blit(self.major, (self.start_x_pos + self.shift_x * 7, self.start_y_pos))
+        self.surface.blit(self.wheat, (self.start_x_pos +
+                                       self.shift_x * 0, self.start_y_pos))
+        self.surface.blit(self.cow, (self.start_x_pos +
+                                     self.shift_x * 1, self.start_y_pos))
+        self.surface.blit(self.gear, (self.start_x_pos +
+                                      self.shift_x * 2, self.start_y_pos))
+        self.surface.blit(self.bread, (self.start_x_pos +
+                                       self.shift_x * 3, self.start_y_pos))
+        self.surface.blit(self.factory, (self.start_x_pos +
+                                         self.shift_x * 4, self.start_y_pos))
+        self.surface.blit(self.fruit, (self.start_x_pos +
+                                       self.shift_x * 5, self.start_y_pos))
+        self.surface.blit(self.cup, (self.start_x_pos +
+                                     self.shift_x * 6, self.start_y_pos))
+        self.surface.blit(self.major, (self.start_x_pos +
+                                       self.shift_x * 7, self.start_y_pos))
 
 
 class Block(pygame.sprite.Sprite):
@@ -138,7 +172,8 @@ class Block(pygame.sprite.Sprite):
         self.font = pygame.font.Font('data/DisposableDroidBB.ttf', 25)
         self.color = pygame.Color('black')
         die_roll_list = list(map(str, list(self.block.die_roll)))
-        text = self.font.render(f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)} {f"({amount})" if amount > 1 else ""}', 1, self.color)
+        text = self.font.render(
+            f'{" " * (5 - len(die_roll_list))}{"-".join(die_roll_list)} {f"({amount})" if amount > 1 else ""}', 1, self.color)
         self.image.blit(text, (5, 5))
 
 
@@ -188,7 +223,8 @@ class LandmarkSprite(pygame.sprite.Sprite):
     def __init__(self, group, landmark, coord):
         super().__init__(group)
         self.card = landmark
-        self.image = pygame.transform.scale(load_image(self.card.image), (95, 140))
+        self.image = pygame.transform.scale(
+            load_image(self.card.image), (95, 140))
         self.rect = self.image.get_rect()
         self.rect.x = 1100
         self.rect.y = 145 * coord + 20
@@ -345,7 +381,8 @@ class Game:
         if 'MacBook' in self.node.hostname:
             self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         else:
-            self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.FULLSCREEN)
+            self.screen = pygame.display.set_mode(
+                (self.WIDTH, self.HEIGHT), pygame.FULLSCREEN)
 
         self.cursor_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
@@ -609,7 +646,7 @@ class Game:
                         for elem in self.notification_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
-                                    if elem == notification.button:
+                                    if elem == notification.close_button:
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
                                             if flags['game_found']:
@@ -707,7 +744,8 @@ class Game:
             if flags['game_started']['text']:
                 self.players = list(
                     map(eval, flags['game_started']['players']))
-                self.deck = list(map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
+                self.deck = list(
+                    map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
                 for card in self.deck:
                     card.cost = card.cost
                     card.die_roll = card.die_roll
@@ -733,6 +771,7 @@ class Game:
         self.shop_group = pygame.sprite.Group()
         self.shop_notifications_group = pygame.sprite.Group()
         self.block_notification_group = pygame.sprite.Group()
+        self.roll_notification_group = pygame.sprite.Group()
         self.block_group = pygame.sprite.Group()
         self.table_group = pygame.sprite.Group()
         self.landmark_group = pygame.sprite.Group()
@@ -765,12 +804,14 @@ class Game:
             player.buy_flag = False
 
             if is_myself:
-                # something about node
+                self.node.send('landmark', map(
+                    lambda x: x.get_ip(), self.players), name=landmark_sprite.card.name)
                 shop_notification.sprite.kill()
                 self.shop_notifications_group.empty()
 
             for i, key in enumerate(self.myself.landmarks):
-                LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
+                LandmarkSprite(self.landmark_group,
+                               self.myself.landmarks[key], i)
 
         def trigger_cards(die_roll, cur_player, myself):
             result = 0
@@ -797,20 +838,26 @@ class Game:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
                                 if player == myself:
-                                    result += len(player.get_cards()['wheat']) * 3
-                                player.money += len(player.get_cards()['wheat']) * 3
+                                    result += len(player.get_cards()
+                                                  ['wheat']) * 3
+                                player.money += len(player.get_cards()
+                                                    ['wheat']) * 3
                     elif type_ == 'factory' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'Cheese Factory':
                                 if die_roll in card.die_roll:
                                     if player == myself:
-                                        result += len(player.get_cards()['cow']) * 3
-                                    player.money += len(player.get_cards()['cow']) * 3
+                                        result += len(player.get_cards()
+                                                      ['cow']) * 3
+                                    player.money += len(player.get_cards()
+                                                        ['cow']) * 3
                             else:  # Furniture Factory
                                 if die_roll in card.die_roll:
                                     if player == myself:
-                                        result += len(player.get_cards()['gear']) * 3
-                                    player.money += len(player.get_cards()['gear']) * 3
+                                        result += len(player.get_cards()
+                                                      ['gear']) * 3
+                                    player.money += len(player.get_cards()
+                                                        ['gear']) * 3
                     elif type_ == 'major' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'TV station':
@@ -831,7 +878,8 @@ class Game:
             return result
 
         def take_money(amount):
-            notification = Notification(self.notification_group, [f'Click on another player to take {amount}', 'coins from them'])
+            notification = Notification(self.notification_group, [
+                                        f'Click on another player to take {amount}', 'coins from them'])
             self.take_money = True
             while True:
                 for event in pygame.event.get():
@@ -857,16 +905,17 @@ class Game:
                                         icon.player.money -= minus
                                         self.myself.money += minus
                                         self.take_money = False
-                                        self.node.send('take', map(lambda x: x.get_ip(), self.players), coins=minus, victim_ip=icon.player.get_ip())
+                                        self.node.send('take', map(lambda x: x.get_ip(
+                                        ), self.players), coins=minus, victim_ip=icon.player.get_ip())
                                         self.notification_group.empty()
                                         return minus
 
                             for elem in self.notification_group:
                                 if isinstance(elem, Button):
                                     if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                        if elem == notification.button: 
+                                        if elem == notification.close_button:
                                             self.notification_group.empty()
-                
+
                 update_screen()
                 self.players_icon_group.draw(self.screen)
                 self.shop_group.draw(self.screen)
@@ -877,6 +926,17 @@ class Game:
                     self.cursor_group.draw(self.screen)
                 self.clock.tick(self.FPS)
                 pygame.display.flip()
+
+        def dice_roll(amount, cur_player):
+            cur_die_roll = sum([randint(1, 6) for _ in range(amount)])
+            self.node.send(f'roll {cur_die_roll}', map(
+                lambda x: x.get_ip(), self.players))
+            cur_player.dice_rolled = True
+            result = trigger_cards(cur_die_roll, cur_player, self.myself)
+            s = '' if result == 1 else 's'
+            notification = Notification(self.notification_group, [
+                                        f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+            return cur_die_roll
 
         for x in range(5):
             for y in range(3):
@@ -895,14 +955,13 @@ class Game:
                           (200, 50), fontsize=50) if self.players[0] == self.myself else None
 
         for i, key in enumerate(self.myself.landmarks):
-                LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
+            LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
 
         cur_turn = 0
 
         while True:
             cur_player = self.players[cur_turn % len(self.players)]
             if cur_player != self.myself and end_turn is not None:
-                self.buttons_group.remove(end_turn)
                 end_turn.kill()
                 end_turn = None
             elif cur_player == self.myself and end_turn is None:
@@ -910,18 +969,19 @@ class Game:
                                   650, 'end turn', (200, 50), fontsize=50)
 
             if cur_player == self.myself and not cur_player.dice_rolled:
-                cur_die_roll = randint(1, 2)
-                self.node.send(f'roll {cur_die_roll}', map(lambda x: x.get_ip(), self.players))
-                cur_player.dice_rolled = True
-                result = trigger_cards(cur_die_roll, cur_player, self.myself)
-                s = '' if result == 1 else 's'
-                notification = Notification(self.notification_group, [f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                if not self.myself.get_landmarks()['station'].get_active():
+                    cur_die_roll = dice_roll(1, cur_player)
+                else:
+                    notification = DieRollNotification(
+                        self.roll_notification_group, ('How many dice you', 'want to roll?'))
 
             self.block_group.empty()
             for i, type_ in enumerate(self.myself.cards):
-                counter = Counter([card.name for card in self.myself.cards[type_]])
+                counter = Counter(
+                    [card.name for card in self.myself.cards[type_]])
                 for j, block in enumerate(counter.most_common()):
-                    Block(self.block_group, self.myself.cards[type_][j], block[1], i, j)            
+                    Block(self.block_group,
+                          self.myself.cards[type_][j], block[1], i, j)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -932,7 +992,7 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        if not self.notification_group:
+                        if not self.notification_group and not self.roll_notification_group:
                             for button in self.buttons_group:
                                 if button.rect.collidepoint(pygame.mouse.get_pos()):
                                     button.press()
@@ -948,10 +1008,15 @@ class Game:
                             if isinstance(elem, Button):
                                 if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     elem.press()
+                        for elem in self.roll_notification_group:
+                            if isinstance(elem, Button):
+                                if elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                    elem.press()
+                        
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
-                        if not self.notification_group:
+                        if not self.notification_group and not self.roll_notification_group:
                             for button in self.buttons_group:
                                 if button.rect.collidepoint(pygame.mouse.get_pos()) and button.unpress():
                                     if button == exit_btn:
@@ -966,12 +1031,13 @@ class Game:
                                         self.node.send(
                                             'end turn', map(lambda x: x.get_ip(), self.players))
                                         cur_turn += 1
-                                        cur_player = self.players[cur_turn % len(self.players)]
+                                        cur_player = self.players[cur_turn % len(
+                                            self.players)]
                                         cur_player.buy_flag = True
                             for card in self.shop_group:
                                 if card.rect.collidepoint(pygame.mouse.get_pos()):
                                     shop_notification = ShopNotification(self.shop_notifications_group, card, self.myself, self.myself ==
-                                                                    cur_player)
+                                                                         cur_player)
                             for landmark in self.landmark_group:
                                 if landmark.rect.collidepoint(pygame.mouse.get_pos()):
                                     shop_notification = ShopNotification(self.shop_notifications_group, landmark,
@@ -983,16 +1049,19 @@ class Game:
                                         if elem == shop_notification.buy_button:
                                             if shop_notification.is_active and self.myself.buy_flag:
                                                 if isinstance(shop_notification.card, Card):
-                                                    buy_card(self.myself, shop_notification.sprite, True)
+                                                    buy_card(
+                                                        self.myself, shop_notification.sprite, True)
                                                 elif isinstance(shop_notification.card, Landmark):
-                                                    build(self.myself, shop_notification.sprite, True)
+                                                    build(
+                                                        self.myself, shop_notification.sprite, True)
                                             else:
                                                 elem.make_inactive()
                                         elif elem == shop_notification.close_button:
                                             self.shop_notifications_group.empty()
                             for block in self.block_group:
                                 if block.rect.collidepoint(pygame.mouse.get_pos()):
-                                    block_notification = BlockNotification(self.block_notification_group, block.block)
+                                    block_notification = BlockNotification(
+                                        self.block_notification_group, block.block)
                             for elem in self.block_notification_group:
                                 if isinstance(elem, Button):
                                     if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
@@ -1001,10 +1070,19 @@ class Game:
                         for elem in self.notification_group:
                             if isinstance(elem, Button):
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
-                                    if elem == notification.button:
+                                    if elem == notification.close_button:
                                         self.notification_group.empty()
                             elif not elem.rect.collidepoint(pygame.mouse.get_pos()):
                                 self.notification_group.empty()
+                        for elem in self.roll_notification_group:
+                            if isinstance(elem, Button):
+                                if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
+                                    if elem == notification.close_button:
+                                        self.roll_notification_group.empty()
+                                        cur_die_roll = dice_roll(2, cur_player)
+                                    elif elem == notification.add_button:
+                                        self.roll_notification_group.empty()
+                                        cur_die_roll = dice_roll(1, cur_player)
             try:
                 shop_notification.update(self.myself == cur_player)
             except Exception:
@@ -1034,18 +1112,28 @@ class Game:
                 elif 'roll' in message['text']:
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
-                    result = trigger_cards(cur_die_roll, cur_player, self.myself)
+                    result = trigger_cards(
+                        cur_die_roll, cur_player, self.myself)
                     s = '' if result == 1 else 's'
-                    notification = Notification(self.notification_group, [f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                    notification = Notification(self.notification_group, [
+                                                f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
                 elif 'take' in message['text']:
-                    player = list(filter(lambda x: x.get_ip() == message['ip'], self.players))[0]
-                    victim = list(filter(lambda x: x.get_ip() == message['victim_ip'], self.players))[0]
+                    player = list(filter(lambda x: x.get_ip() ==
+                                         message['ip'], self.players))[0]
+                    victim = list(filter(lambda x: x.get_ip() ==
+                                         message['victim_ip'], self.players))[0]
                     player.money += message['coins']
                     victim.money -= message['coins']
                     if victim == self.myself:
-                        notification = Notification(self.notification_group, [f'{player.get_ip()} took {message["coins"]} coins', 'from you'])
+                        notification = Notification(self.notification_group, [
+                                                    f'{player.get_ip()} took {message["coins"]} coins', 'from you'])
                     else:
-                        notification = Notification(self.notification_group, [f'{player.get_ip()} took {message["coins"]} coins', f'from {victim.get_ip()}'])
+                        notification = Notification(self.notification_group, [
+                                                    f'{player.get_ip()} took {message["coins"]} coins', f'from {victim.get_ip()}'])
+                elif message['text'] == 'landmark':
+                    player = list(filter(lambda x: x.get_ip() ==
+                                         message['ip'], self.players))[0]
+                    build(player, player.get_landmarks()[message['name']], False)
 
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
