@@ -949,11 +949,11 @@ class Game:
                 roll_2 = randint(1, 6)
                 cur_die_roll = roll_1 + roll_2
                 self.myself.dice_rolled = True
-                result = trigger_cards(cur_die_roll, self.myself, self.myself)
+                result = trigger_cards(cur_die_roll, self.myself)
                 s = '' if result == 1 else 's'
                 if roll_1 == roll_2:
                     self.node.send(f'roll {cur_die_roll} __EXTRA_TURN__', map(lambda x: x.get_ip(), self.players))
-                    if self.myself.get_landmarks()['tower'].get_active() and self.can_reroll():
+                    if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
                         notification = DieRollNotification(self.notification_group, [
                                                     f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
                                                     'You take an extra turn'], 'reroll', 'pass')
@@ -963,7 +963,7 @@ class Game:
                                                     'You take an extra turn'])
                     return str(cur_die_roll) + ' __EXTRA_TURN__', notification
                 else:
-                    if self.myself.get_landmarks()['tower'].get_active() and self.can_reroll():
+                    if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
                         notification = DieRollNotification(self.notification_group, [
                                                     f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
                     else:
@@ -975,9 +975,9 @@ class Game:
                 self.node.send(f'roll {cur_die_roll}', map(
                     lambda x: x.get_ip(), self.players))
                 cur_player.dice_rolled = True
-                result = trigger_cards(cur_die_roll, cur_player, self.myself)
+                result = trigger_cards(cur_die_roll, cur_player)
                 s = '' if result == 1 else 's'
-                if self.myself.get_landmarks()['tower'].get_active() and self.can_reroll():
+                if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
                     notification = DieRollNotification(self.notification_group, [
                                                 f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
                 else:
@@ -1134,7 +1134,7 @@ class Game:
                                     if elem == notification.close_button:
                                         if notification.close_button.text == 'roll 2':
                                             self.roll_notification_group.empty()
-                                            cur_die_roll, notification = dice_roll(2, cur_player)
+                                            cur_die_roll, notification = dice_roll(2)
                                         elif notification.close_button.text == 'reroll' and self.myself.can_reroll():
                                             self.myself.reroll = False
                                             self.roll_notification_group.empty()
@@ -1183,7 +1183,7 @@ class Game:
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
                     result = trigger_cards(
-                        cur_die_roll, cur_player, self.myself)
+                        cur_die_roll, cur_player)
                     s = '' if result == 1 else 's'
                     if '__EXTRA_TURN__' not in message['text']:
                         notification = Notification(self.notification_group, [
