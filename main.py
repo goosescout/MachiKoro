@@ -777,6 +777,7 @@ class Game:
         self.landmark_group = pygame.sprite.Group()
         self.block = Table(self.screen)
         self.take_money = 0
+        self.extra_turn = False
 
         def update_screen():
             background = pygame.transform.scale(load_image(
@@ -928,15 +929,33 @@ class Game:
                 pygame.display.flip()
 
         def dice_roll(amount, cur_player):
-            cur_die_roll = sum([randint(1, 6) for _ in range(amount)])
-            self.node.send(f'roll {cur_die_roll}', map(
-                lambda x: x.get_ip(), self.players))
-            cur_player.dice_rolled = True
-            result = trigger_cards(cur_die_roll, cur_player, self.myself)
-            s = '' if result == 1 else 's'
-            notification = Notification(self.notification_group, [
-                                        f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
-            return cur_die_roll
+            if amount == 2 and cur_player.get_landmarks()['park'].get_active():
+                roll_1 = randint(1, 6)
+                roll_2 = randint(1, 6)
+                cur_die_roll = roll_1 + roll_2
+                cur_player.dice_rolled = True
+                result = trigger_cards(cur_die_roll, cur_player, self.myself)
+                s = '' if result == 1 else 's'
+                if roll_1 == roll_2:
+                    self.node.send(f'roll {cur_die_roll} __EXTRA_TURN__', map(lambda x: x.get_ip(), self.players))
+                    notification = Notification(self.notification_group, [
+                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
+                                                'You take an extra turn'])
+                    return str(cur_die_roll) + ' __EXTRA_TURN__', notification
+                else:
+                    notification = Notification(self.notification_group, [
+                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                    return cur_die_roll, notification
+            else:
+                cur_die_roll = sum([randint(1, 6) for _ in range(amount)])
+                self.node.send(f'roll {cur_die_roll}', map(
+                    lambda x: x.get_ip(), self.players))
+                cur_player.dice_rolled = True
+                result = trigger_cards(cur_die_roll, cur_player, self.myself)
+                s = '' if result == 1 else 's'
+                notification = Notification(self.notification_group, [
+                                            f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                return cur_die_roll, notification
 
         for x in range(5):
             for y in range(3):
@@ -970,7 +989,7 @@ class Game:
 
             if cur_player == self.myself and not cur_player.dice_rolled:
                 if not self.myself.get_landmarks()['station'].get_active():
-                    cur_die_roll = dice_roll(1, cur_player)
+                    cur_die_roll, notification = dice_roll(1, cur_player)
                 else:
                     notification = DieRollNotification(
                         self.roll_notification_group, ('How many dice you', 'want to roll?'))
@@ -1030,7 +1049,10 @@ class Game:
                                     elif button == end_turn:
                                         self.node.send(
                                             'end turn', map(lambda x: x.get_ip(), self.players))
-                                        cur_turn += 1
+                                        if not self.extra_turn:
+                                            cur_turn += 1
+                                        else:
+                                            self.extra_turn = False
                                         cur_player = self.players[cur_turn % len(
                                             self.players)]
                                         cur_player.buy_flag = True
@@ -1079,10 +1101,10 @@ class Game:
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     if elem == notification.close_button:
                                         self.roll_notification_group.empty()
-                                        cur_die_roll = dice_roll(2, cur_player)
+                                        cur_die_roll, notification = dice_roll(2, cur_player)
                                     elif elem == notification.add_button:
                                         self.roll_notification_group.empty()
-                                        cur_die_roll = dice_roll(1, cur_player)
+                                        cur_die_roll, notification = dice_roll(1, cur_player)
             try:
                 shop_notification.update(self.myself == cur_player)
             except Exception:
@@ -1092,7 +1114,10 @@ class Game:
                 message = latest_message['message']
                 if message['text'] == 'end turn':
                     self.notification_group.empty()
-                    cur_turn += 1
+                    if not self.extra_turn:
+                        cur_turn += 1
+                    else:
+                        self.extra_turn = False
                     cur_player = self.players[cur_turn % len(self.players)]
                     cur_player.buy_flag = True
                     cur_player.dice_rolled = False
@@ -1115,8 +1140,14 @@ class Game:
                     result = trigger_cards(
                         cur_die_roll, cur_player, self.myself)
                     s = '' if result == 1 else 's'
-                    notification = Notification(self.notification_group, [
-                                                f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                    if '__EXTRA_TURN__' not in message['text']:
+                        notification = Notification(self.notification_group, [
+                                                    f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                    else:
+                        notification = Notification(self.notification_group, [
+                                                    f'{cur_player.get_ip()} rolled {cur_die_roll}', f'You got {result} coin{s}',
+                                                    'That player takes an extra turn'])
+                        self.extra_turn = True
                 elif 'take' in message['text']:
                     player = list(filter(lambda x: x.get_ip() ==
                                          message['ip'], self.players))[0]
