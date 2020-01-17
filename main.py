@@ -807,7 +807,7 @@ class Game:
 
             if is_myself:
                 self.node.send('landmark', map(
-                    lambda x: x.get_ip(), self.players), name=landmark_sprite.card.name)
+                    lambda x: x.get_ip(), self.players), name=landmark_sprite.card.short_name)
                 shop_notification.sprite.kill()
                 self.shop_notifications_group.empty()
 

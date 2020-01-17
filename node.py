@@ -27,9 +27,9 @@ class Node:
             message[key] = value
         if ip is None:
             to_ip = '.'.join(self.ip.split('.')[:-1])
-            for i in range(256):
-                sock.sendto(bytes(str(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
-            #sock.sendto(bytes(str(message), encoding='utf-8'), (('172.20.10.3' if "MacBook" in self.hostname else "192.168.43.242"), self.port))
+            #for i in range(256):
+                #sock.sendto(bytes(str(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
+            sock.sendto(bytes(str(message), encoding='utf-8'), (('172.20.10.3' if "MacBook" in self.hostname else "172.20.10.12"), self.port))
         elif isinstance(ip, list) or isinstance(ip, map):
             for elem in ip:
                 if elem != self.ip:
