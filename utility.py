@@ -40,6 +40,7 @@ class Player:
         self.money = 3
         self.buy_flag = True
         self.dice_rolled = False
+        self.reroll = False
 
     def is_host(self):
         return self.host
@@ -58,6 +59,9 @@ class Player:
 
     def get_money(self):
         return self.money
+
+    def can_reroll(self):
+        return self.reroll
 
     def __str__(self):
         return f"Player('{self.ip}', {self.host})"

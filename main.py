@@ -46,12 +46,12 @@ class Notification(pygame.sprite.Sprite):
 
 
 class DieRollNotification(Notification):
-    def __init__(self, group, text, **kwargs):
+    def __init__(self, group, text, button_1='roll 1', button_2='roll 2', **kwargs):
         group.empty()
         super().__init__(group, text, **kwargs)
-        self.close_button = Button(group, 910, 450, 'roll 1',
+        self.close_button = Button(group, 910, 450, button_1,
                                    size=(150, 50), fontsize=50)
-        self.add_button = Button(group, 740, 450, 'roll 2', size=(
+        self.add_button = Button(group, 740, 450, button_2, size=(
             150, 50), fontsize=50)
 
 
@@ -296,6 +296,7 @@ class Button(pygame.sprite.Sprite):
         super().__init__(group)
         self.group = group
         self.size = size
+        self.text = text
         if self.size is None:
             self.image = load_image('button.png')
         else:
@@ -814,7 +815,7 @@ class Game:
                 LandmarkSprite(self.landmark_group,
                                self.myself.landmarks[key], i)
 
-        def trigger_cards(die_roll, cur_player, myself):
+        def trigger_cards(die_roll, cur_player):
             result = 0
             for player in self.players:
                 for type_ in player.get_cards().keys():
@@ -822,37 +823,37 @@ class Game:
                         if player.get_landmarks()['mall'].get_active():
                             for card in player.get_cards()[type_]:
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += take_money(card.get_production() + 1)
                         else:
                             for card in player.get_cards()[type_]:
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += take_money(card.get_production())
 
                     elif type_ in {'wheat', 'cow', 'gear'}:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
-                                if player == myself:
+                                if player == self.myself:
                                     result += card.get_production()
                                 player.money += card.get_production()
                     elif type_ == 'bread' and cur_player == player:
                         if player.get_landmarks()['mall'].get_active():
                             for card in player.get_cards()[type_]:
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += card.get_production() + 1
                                     player.money += card.get_production() + 1
                         else:
                             for card in player.get_cards()[type_]:
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += card.get_production()
                                     player.money += card.get_production()
                     elif type_ == 'fruit' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
-                                if player == myself:
+                                if player == self.myself:
                                     result += len(player.get_cards()
                                                   ['wheat']) * 3
                                 player.money += len(player.get_cards()
@@ -861,14 +862,14 @@ class Game:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'Cheese Factory':
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += len(player.get_cards()
                                                       ['cow']) * 3
                                     player.money += len(player.get_cards()
                                                         ['cow']) * 3
                             else:  # Furniture Factory
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += len(player.get_cards()
                                                       ['gear']) * 3
                                     player.money += len(player.get_cards()
@@ -877,11 +878,11 @@ class Game:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'TV station':
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += take_money(card.get_production())
                             elif card.get_name() == 'Stadium':
                                 if die_roll in card.die_roll:
-                                    if player == myself:
+                                    if player == self.myself:
                                         result += (len(self.players) - 1) * 2
                                     player.money += (len(self.players) - 1) * 2
                                     for inner_player in self.players:
@@ -942,23 +943,32 @@ class Game:
                 self.clock.tick(self.FPS)
                 pygame.display.flip()
 
-        def dice_roll(amount, cur_player):
-            if amount == 2 and cur_player.get_landmarks()['park'].get_active():
+        def dice_roll(amount):
+            if amount == 2 and self.myself.get_landmarks()['park'].get_active():
                 roll_1 = randint(1, 6)
                 roll_2 = randint(1, 6)
                 cur_die_roll = roll_1 + roll_2
-                cur_player.dice_rolled = True
-                result = trigger_cards(cur_die_roll, cur_player, self.myself)
+                self.myself.dice_rolled = True
+                result = trigger_cards(cur_die_roll, self.myself, self.myself)
                 s = '' if result == 1 else 's'
                 if roll_1 == roll_2:
                     self.node.send(f'roll {cur_die_roll} __EXTRA_TURN__', map(lambda x: x.get_ip(), self.players))
-                    notification = Notification(self.notification_group, [
-                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
-                                                'You take an extra turn'])
+                    if self.myself.get_landmarks()['tower'].get_active() and self.can_reroll():
+                        notification = DieRollNotification(self.notification_group, [
+                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
+                                                    'You take an extra turn'], 'reroll', 'pass')
+                    else:
+                        notification = Notification(self.notification_group, [
+                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
+                                                    'You take an extra turn'])
                     return str(cur_die_roll) + ' __EXTRA_TURN__', notification
                 else:
-                    notification = Notification(self.notification_group, [
-                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                    if self.myself.get_landmarks()['tower'].get_active() and self.can_reroll():
+                        notification = DieRollNotification(self.notification_group, [
+                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
+                    else:
+                        notification = Notification(self.notification_group, [
+                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
                     return cur_die_roll, notification
             else:
                 cur_die_roll = sum([randint(1, 6) for _ in range(amount)])
@@ -967,8 +977,11 @@ class Game:
                 cur_player.dice_rolled = True
                 result = trigger_cards(cur_die_roll, cur_player, self.myself)
                 s = '' if result == 1 else 's'
-                notification = Notification(self.notification_group, [
-                                            f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                if self.myself.get_landmarks()['tower'].get_active() and self.can_reroll():
+                    notification = DieRollNotification(self.notification_group, [
+                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
+                else:
+
                 return cur_die_roll, notification
 
         for x in range(5):
@@ -1002,6 +1015,7 @@ class Game:
                                   650, 'end turn', (200, 50), fontsize=50)
 
             if cur_player == self.myself and not cur_player.dice_rolled:
+                self.myself.can_reroll() = True
                 if not self.myself.get_landmarks()['station'].get_active():
                     cur_die_roll, notification = dice_roll(1, cur_player)
                 else:
@@ -1117,11 +1131,24 @@ class Game:
                             if isinstance(elem, Button):
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     if elem == notification.close_button:
-                                        self.roll_notification_group.empty()
-                                        cur_die_roll, notification = dice_roll(2, cur_player)
+                                        if notification.close_button.text == 'roll 2':
+                                            self.roll_notification_group.empty()
+                                            cur_die_roll, notification = dice_roll(2, cur_player)
+                                        elif notification.close_button.text == 'reroll' and self.myself.can_reroll():
+                                            self.myself.reroll = False
+                                            self.roll_notification_group.empty()
+                                            if not self.myself.get_landmarks()['station'].get_active():
+                                                cur_die_roll, notification = dice_roll(1)
+                                            else:
+                                                notification = DieRollNotification(
+                                                    self.roll_notification_group, ('How many dice you', 'want to roll?'))
                                     elif elem == notification.add_button:
-                                        self.roll_notification_group.empty()
-                                        cur_die_roll, notification = dice_roll(1, cur_player)
+                                        if notification.close_button.text == 'roll 1':
+                                            self.roll_notification_group.empty()
+                                            cur_die_roll, notification = dice_roll(1)
+                                        elif notification.close_button.text == 'pass':
+                                            self.roll_notification_group.empty()
+                                
             try:
                 shop_notification.update(self.myself == cur_player)
             except Exception:
