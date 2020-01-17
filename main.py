@@ -819,10 +819,17 @@ class Game:
             for player in self.players:
                 for type_ in player.get_cards().keys():
                     if type_ == 'cup' and cur_player != player:
-                        for card in player.get_cards()[type_]:
-                            if die_roll in card.die_roll:
-                                if player == myself:
-                                    result += take_money(card.get_production())
+                        if player.get_landmarks()['mall'].get_active():
+                            for card in player.get_cards()[type_]:
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += take_money(card.get_production() + 1)
+                        else:
+                            for card in player.get_cards()[type_]:
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += take_money(card.get_production())
+
                     elif type_ in {'wheat', 'cow', 'gear'}:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
@@ -830,11 +837,18 @@ class Game:
                                     result += card.get_production()
                                 player.money += card.get_production()
                     elif type_ == 'bread' and cur_player == player:
-                        for card in player.get_cards()[type_]:
-                            if die_roll in card.die_roll:
-                                if player == myself:
-                                    result += card.get_production()
-                                player.money += card.get_production()
+                        if player.get_landmarks()['mall'].get_active():
+                            for card in player.get_cards()[type_]:
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += card.get_production() + 1
+                                    player.money += card.get_production() + 1
+                        else:
+                            for card in player.get_cards()[type_]:
+                                if die_roll in card.die_roll:
+                                    if player == myself:
+                                        result += card.get_production()
+                                    player.money += card.get_production()
                     elif type_ == 'fruit' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if die_roll in card.die_roll:
