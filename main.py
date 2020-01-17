@@ -49,6 +49,9 @@ class DieRollNotification(Notification):
     def __init__(self, group, text, button_1='roll 1', button_2='roll 2', **kwargs):
         group.empty()
         super().__init__(group, text, **kwargs)
+        self.close_button.kill()
+        if self.add_button is not None:
+            self.add_button.kill()
         self.close_button = Button(group, 910, 450, button_1,
                                    size=(150, 50), fontsize=50)
         self.add_button = Button(group, 740, 450, button_2, size=(
@@ -383,7 +386,7 @@ class Game:
             self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         else:
             self.screen = pygame.display.set_mode(
-                (self.WIDTH, self.HEIGHT), pygame.FULLSCREEN)
+                (self.WIDTH, self.HEIGHT))
 
         self.cursor_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
@@ -1028,6 +1031,7 @@ class Game:
 
             if cur_player == self.myself and not cur_player.dice_rolled:
                 self.myself.reroll = True
+                cur_player.dice_rolled = True
                 if not self.myself.get_landmarks()['station'].get_active():
                     cur_die_roll, notification = dice_roll(1)
                 else:
@@ -1141,6 +1145,7 @@ class Game:
                                 self.notification_group.empty()
                         for elem in self.roll_notification_group:
                             if isinstance(elem, Button):
+                                print(elem.text)
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     if elem == notification.close_button:
                                         if notification.close_button.text == 'roll 1':
