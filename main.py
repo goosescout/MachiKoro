@@ -981,7 +981,8 @@ class Game:
                     notification = DieRollNotification(self.notification_group, [
                                                 f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
                 else:
-
+                    notification = Notification(self.notification_group, [
+                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
                 return cur_die_roll, notification
 
         for x in range(5):
