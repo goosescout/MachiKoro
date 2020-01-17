@@ -1247,6 +1247,7 @@ class Game:
             self.notification_group.draw(self.screen)
             self.shop_notifications_group.draw(self.screen)
             self.block_notification_group.draw(self.screen)
+            self.roll_notification_group.draw(self.screen)
             if pygame.mouse.get_focused():
                 self.cursor_group.draw(self.screen)
             self.clock.tick(self.FPS)
