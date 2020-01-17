@@ -1143,9 +1143,9 @@ class Game:
                             if isinstance(elem, Button):
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     if elem == notification.close_button:
-                                        if notification.close_button.text == 'roll 2':
+                                        if notification.close_button.text == 'roll 1':
                                             self.roll_notification_group.empty()
-                                            cur_die_roll, notification = dice_roll(2)
+                                            cur_die_roll, notification = dice_roll(1)
                                         elif notification.close_button.text == 'reroll' and self.myself.can_reroll():
                                             self.myself.reroll = False
                                             self.roll_notification_group.empty()
@@ -1155,9 +1155,9 @@ class Game:
                                                 notification = DieRollNotification(
                                                     self.roll_notification_group, ('How many dice you', 'want to roll?'))
                                     elif elem == notification.add_button:
-                                        if notification.close_button.text == 'roll 1':
+                                        if notification.close_button.text == 'roll 2':
                                             self.roll_notification_group.empty()
-                                            cur_die_roll, notification = dice_roll(1)
+                                            cur_die_roll, notification = dice_roll(2)
                                         elif notification.close_button.text == 'pass':
                                             self.roll_notification_group.empty()
                                 
