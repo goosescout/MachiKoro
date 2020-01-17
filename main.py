@@ -1108,6 +1108,9 @@ class Game:
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     if elem == notification.close_button:
                                         self.notification_group.empty()
+                                    elif elem == notification.add_button:
+                                        self.notification_group.empty()
+                                        return self.start_screen
                             elif not elem.rect.collidepoint(pygame.mouse.get_pos()):
                                 self.notification_group.empty()
                         for elem in self.roll_notification_group:
@@ -1178,7 +1181,11 @@ class Game:
                 elif message['text'] == 'landmark':
                     player = list(filter(lambda x: x.get_ip() ==
                                          message['ip'], self.players))[0]
+
                     build(player, player.get_landmarks()[message['name']], False)
+
+                    if len(player.get_active_landmarks()) == 4:
+                        notification = Notification(self.notification_group, [f'{player} has won the game!'], add_button='exit')
 
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
