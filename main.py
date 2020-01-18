@@ -394,6 +394,8 @@ class Game:
         self.cursor = Cursor(self.cursor_group)
 
         self.players = []
+        pygame.mixer.music.load('data/music.mp3')
+        pygame.mixer.music.play(-1)
 
         next_screen = self.start_screen()
         while True:
