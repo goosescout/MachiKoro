@@ -386,7 +386,7 @@ class Game:
             self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         else:
             self.screen = pygame.display.set_mode(
-                (self.WIDTH, self.HEIGHT))
+                (self.WIDTH, self.HEIGHT), pygame.FULLSCREEN)
 
         self.cursor_group = pygame.sprite.Group()
         self.buttons_group = pygame.sprite.Group()
