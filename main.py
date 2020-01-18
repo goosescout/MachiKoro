@@ -838,7 +838,8 @@ class Game:
                             for card in player.get_cards()[type_]:
                                 if die_roll in card.die_roll:
                                     if player == self.myself:
-                                        result += take_money(card.get_production() + 1)
+                                        result += take_money(
+                                            card.get_production() + 1)
                         else:
                             for card in player.get_cards()[type_]:
                                 if die_roll in card.die_roll:
@@ -966,11 +967,12 @@ class Game:
                 result = trigger_cards(cur_die_roll, self.myself)
                 s = '' if result == 1 else 's'
                 if roll_1 == roll_2:
-                    self.node.send(f'roll {cur_die_roll} __EXTRA_TURN__', map(lambda x: x.get_ip(), self.players))
+                    self.node.send(f'roll {cur_die_roll} __EXTRA_TURN__', map(
+                        lambda x: x.get_ip(), self.players))
                     if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
                         notification = DieRollNotification(self.notification_group, [
-                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
-                                                    'You take an extra turn'], 'reroll', 'pass')
+                            f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
+                            'You take an extra turn'], 'reroll', 'pass')
                     else:
                         notification = Notification(self.notification_group, [
                                                     f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
@@ -979,7 +981,7 @@ class Game:
                 else:
                     if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
                         notification = DieRollNotification(self.notification_group, [
-                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
+                            f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
                     else:
                         notification = Notification(self.notification_group, [
                                                     f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
@@ -993,7 +995,7 @@ class Game:
                 s = '' if result == 1 else 's'
                 if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
                     notification = DieRollNotification(self.notification_group, [
-                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
+                        f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
                 else:
                     notification = Notification(self.notification_group, [
                                                 f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
@@ -1075,7 +1077,6 @@ class Game:
                             if isinstance(elem, Button):
                                 if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     elem.press()
-                        
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -1150,22 +1151,25 @@ class Game:
                                     if elem == notification.close_button:
                                         if notification.close_button.text == 'roll 1':
                                             self.roll_notification_group.empty()
-                                            cur_die_roll, notification = dice_roll(1)
+                                            cur_die_roll, notification = dice_roll(
+                                                1)
                                         elif notification.close_button.text == 'reroll' and self.myself.can_reroll():
                                             self.myself.reroll = False
                                             self.roll_notification_group.empty()
                                             if not self.myself.get_landmarks()['station'].get_active():
-                                                cur_die_roll, notification = dice_roll(1)
+                                                cur_die_roll, notification = dice_roll(
+                                                    1)
                                             else:
                                                 notification = DieRollNotification(
                                                     self.roll_notification_group, ('How many dice you', 'want to roll?'))
                                     elif elem == notification.add_button:
                                         if notification.close_button.text == 'roll 2':
                                             self.roll_notification_group.empty()
-                                            cur_die_roll, notification = dice_roll(2)
+                                            cur_die_roll, notification = dice_roll(
+                                                2)
                                         elif notification.close_button.text == 'pass':
                                             self.roll_notification_group.empty()
-                                
+
             try:
                 shop_notification.update(self.myself == cur_player)
             except Exception:
@@ -1226,10 +1230,12 @@ class Game:
                     player = list(filter(lambda x: x.get_ip() ==
                                          message['ip'], self.players))[0]
 
-                    build(player, player.get_landmarks()[message['name']], False)
+                    build(player, player.get_landmarks()
+                          [message['name']], False)
 
                     if len(player.get_active_landmarks()) == 4:
-                        notification = Notification(self.notification_group, [f'{player} has won the game!'], add_button='exit')
+                        notification = Notification(self.notification_group, [
+                                                    f'{player} has won the game!'], add_button='exit')
 
                 latest_message['message'] = {'ip': None}
                 listener_thread = MyThread(
