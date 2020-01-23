@@ -911,8 +911,9 @@ class Game:
             return result
 
         def take_money(amount):
+            s = '' if amount == 1 else 's'
             notification = Notification(self.notification_group, [
-                                        f'Click on another player to take {amount}', 'coins from them'])
+                                        f'Click on another player to take {amount}', f'coin{s} from them'])
             self.take_money = True
             while True:
                 for event in pygame.event.get():
@@ -934,8 +935,9 @@ class Game:
                             if self.take_money:
                                 for icon in self.players_icon_group:
                                     if icon.rect.collidepoint(pygame.mouse.get_pos()) and icon.player != self.myself:
-                                        minus = amount if amount <= icon.player.money else icon.player.money
-                                        icon.player.money -= minus
+                                        minus = amount if amount <= icon.player.get_money() else icon.player.get_money()
+                                        victim = list(filter(lambda x: x == icon.player, self.players))[0]
+                                        victim.money -= minus
                                         self.myself.money += minus
                                         self.take_money = False
                                         self.node.send('take', map(lambda x: x.get_ip(
@@ -954,7 +956,6 @@ class Game:
                 self.shop_group.draw(self.screen)
                 self.buttons_group.draw(self.screen)
                 self.notification_group.draw(self.screen)
-                self.shop_notifications_group.draw(self.screen)
                 if pygame.mouse.get_focused():
                     self.cursor_group.draw(self.screen)
                 self.clock.tick(self.FPS)
@@ -1165,11 +1166,11 @@ class Game:
                                                 notification = DieRollNotification(
                                                     self.roll_notification_group, ('How many dice you', 'want to roll?'))
                                     elif elem == notification.add_button:
-                                        if notification.close_button.text == 'roll 2':
+                                        if notification.add_button.text == 'roll 2':
                                             self.roll_notification_group.empty()
                                             cur_die_roll, notification = dice_roll(
                                                 2)
-                                        elif notification.close_button.text == 'pass':
+                                        elif notification.add_button.text == 'pass':
                                             self.roll_notification_group.empty()
 
             try:
@@ -1222,12 +1223,13 @@ class Game:
                                          message['victim_ip'], self.players))[0]
                     player.money += message['coins']
                     victim.money -= message['coins']
+                    s = '' if message['coins'] == 1 else 's'
                     if victim == self.myself:
                         notification = Notification(self.notification_group, [
-                                                    f'{player.get_ip()} took {message["coins"]} coins', 'from you'])
+                                                    f'{player.get_ip()} took {message["coins"]} coin{s}', 'from you'])
                     else:
                         notification = Notification(self.notification_group, [
-                                                    f'{player.get_ip()} took {message["coins"]} coins', f'from {victim.get_ip()}'])
+                                                    f'{player.get_ip()} took {message["coins"]} coin{s}', f'from {victim.get_ip()}'])
                 elif message['text'] == 'landmark':
                     player = list(filter(lambda x: x.get_ip() ==
                                          message['ip'], self.players))[0]
