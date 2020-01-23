@@ -13,6 +13,9 @@ from cards import ALL_CARDS
 
 
 class Notification(pygame.sprite.Sprite):
+    '''
+    Класс, отвечающий за уведоления на экране
+    '''
     def __init__(self, group, text, font='data/DisposableDroidBB.ttf', fontsize=50, color=pygame.Color('black'),
                  add_button=None):
         group.empty()
@@ -31,11 +34,14 @@ class Notification(pygame.sprite.Sprite):
             self.image.blit(line, (20, shift * (i + 1)))
 
         self.close_button = Button(group, 910, 450, 'close',
-                                   size=(150, 50), fontsize=50)
+                                   size=(150, 50), fontsize=50)  # кнопка закрытия
         self.add_button = Button(group, 740, 450, add_button, size=(
-            150, 50), fontsize=50) if add_button is not None else None
+            150, 50), fontsize=50) if add_button is not None else None  # дополнительная кнопка
 
     def update(self, *args, **kwargs):
+        '''
+        Функция обновления текста уведомления
+        '''
         if 'text' in kwargs.keys():
             self.image = pygame.transform.scale(
                 load_image('button.png'), (880, 320))
@@ -46,6 +52,10 @@ class Notification(pygame.sprite.Sprite):
 
 
 class DieRollNotification(Notification):
+    '''
+    Класс уведомления, связанного с выбором сколько кубиков бросить или перебросить
+    ли кубики. Не имеет кнопки закрытия и не может быть закрыт до ответа пользователя
+    '''
     def __init__(self, group, text, button_1='roll 1', button_2='roll 2', **kwargs):
         group.empty()
         super().__init__(group, text, **kwargs)
@@ -53,12 +63,15 @@ class DieRollNotification(Notification):
         if self.add_button is not None:
             self.add_button.kill()
         self.close_button = Button(group, 910, 450, button_1,
-                                   size=(150, 50), fontsize=50)
+                                   size=(150, 50), fontsize=50)  # первая кнопка
         self.add_button = Button(group, 740, 450, button_2, size=(
-            150, 50), fontsize=50)
+            150, 50), fontsize=50)  # вторая кнопка
 
 
 class ShopNotification(pygame.sprite.Sprite):
+    '''
+    Класс уведомления, связанного с покупкой карты
+    '''
     def __init__(self, group, card_sprite, player, is_active):
         super().__init__(group)
         self.image = pygame.transform.scale(
@@ -97,6 +110,9 @@ class ShopNotification(pygame.sprite.Sprite):
 
 
 class Table:
+    '''
+    Леша
+    '''
     def __init__(self, surface):
         self.start_x_pos = 200
         self.start_y_pos = 600
@@ -159,6 +175,9 @@ class Table:
 
 
 class Block(pygame.sprite.Sprite):
+    '''
+    Леша
+    '''
     def __init__(self, group, block, amount, x, y):
         super().__init__(group)
         self.block = block
@@ -181,6 +200,9 @@ class Block(pygame.sprite.Sprite):
 
 
 class BlockNotification(pygame.sprite.Sprite):
+    '''
+    Леша
+    '''
     def __init__(self, group, card):
         super().__init__(group)
         self.image = pygame.transform.scale(
@@ -207,6 +229,11 @@ class BlockNotification(pygame.sprite.Sprite):
 
 
 class ShopCardSprite(pygame.sprite.Sprite):
+    '''
+    Класс спрайта карты в магазине.
+    Каждая карта в магаззине имеет свои координаты относительно верхнего левого угла.
+    Например, самая левая верхняя карта имеет координаты (0;0), а правая нижняя - (2;4)
+    '''
     def __init__(self, group, card, row, col):
         super().__init__(group)
         self.card = card
@@ -223,6 +250,9 @@ class ShopCardSprite(pygame.sprite.Sprite):
 
 
 class LandmarkSprite(pygame.sprite.Sprite):
+    '''
+    Леша
+    '''
     def __init__(self, group, landmark, coord):
         super().__init__(group)
         self.card = landmark
@@ -234,6 +264,9 @@ class LandmarkSprite(pygame.sprite.Sprite):
 
 
 class PlayerIcon(pygame.sprite.Sprite):
+    '''
+    Класс иконки, показывающей состояние игрока
+    '''
     def __init__(self, group, is_active, is_myself, player, count, font='data/DisposableDroidBB.ttf'):
         self.player = player
         self.is_myself = is_myself
@@ -261,6 +294,9 @@ class PlayerIcon(pygame.sprite.Sprite):
         self.image.blit(line, (5, 5))
 
     def update(self, is_active, count=None):
+        '''
+        Обновляет значения на иконке
+        '''
         self.image = pygame.transform.scale(load_image('button_press.png'), (
             375, 125)) if is_active else pygame.transform.scale(load_image('button.png'), (375, 125))
 
@@ -282,6 +318,9 @@ class PlayerIcon(pygame.sprite.Sprite):
 
 
 class Cursor(pygame.sprite.Sprite):
+    '''
+    Класс курсора
+    '''
     def __init__(self, group):
         super().__init__(group)
         self.group = group
@@ -294,6 +333,9 @@ class Cursor(pygame.sprite.Sprite):
 
 
 class Button(pygame.sprite.Sprite):
+    '''
+    Класс кнопки
+    '''
     def __init__(self, group, x, y, text, size=None, font='data/DisposableDroidBB.ttf', fontsize=100,
                  color=pygame.Color('black')):
         super().__init__(group)
@@ -327,6 +369,9 @@ class Button(pygame.sprite.Sprite):
         return self.rect
 
     def press(self):
+        '''
+        Нажатие кнопки (кнопка не нажимается, если не активна)
+        '''
         if self.active:
             if self.size is None:
                 self.image = load_image('button_press.png')
@@ -337,6 +382,9 @@ class Button(pygame.sprite.Sprite):
             self.pressed = True
 
     def unpress(self):
+        '''
+        Отжатие кнопки (кнопка посчитается отжатой, если она была нажатой и активной)
+        '''
         if self.active:
             if self.size is None:
                 self.image = load_image('button.png')
@@ -350,10 +398,10 @@ class Button(pygame.sprite.Sprite):
             else:
                 return False
 
-    def update(self, *args, **kwargs):
-        self.unpress()
-
     def make_active(self):
+        '''
+        Делает кнопку активной (доступной для нажатия)
+        '''
         self.active = True
         if self.size is None:
             self.image = load_image('button.png')
@@ -363,6 +411,9 @@ class Button(pygame.sprite.Sprite):
         self.image.blit(self.rendered_text, self.place)
 
     def make_inactive(self):
+        '''
+        Делает кнопку не активной (недоступной для нажатия)
+        '''
         self.active = False
         if self.size is None:
             self.image = load_image('button_inactive.png')
@@ -373,6 +424,9 @@ class Button(pygame.sprite.Sprite):
 
 
 class Game:
+    '''
+    Класс игры. Здесь происходят смены всех экранов и реализованы функции всех экранов
+    '''
     def __init__(self):
         pygame.init()
         pygame.mouse.set_visible(False)
@@ -380,8 +434,9 @@ class Game:
         self.HEIGHT = 720
         self.FPS = 60
         self.clock = pygame.time.Clock()
-        self.node = Node()
+        self.node = Node()  # ссылка на узел, с которым работает игра
 
+        # на MacBook'ах полный экран работает неправильно, поэтому он не будет включаться на них
         if 'MacBook' in self.node.hostname:
             self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         else:
@@ -394,20 +449,29 @@ class Game:
         self.cursor = Cursor(self.cursor_group)
 
         self.players = []
+        # включение музыки
         pygame.mixer.music.load('data/music.mp3')
         pygame.mixer.music.play(-1)
 
+        # основной цикл смены экранов
         next_screen = self.start_screen()
         while True:
             next_screen = next_screen()
 
     def terminate(self):
+        '''
+        Функция выхода из игры
+        '''
         pygame.quit()
         sys.exit()
 
     def start_screen(self):
+        '''
+        Функция, вызывающая стартовый экран
+        '''
         self.buttons_group.empty()
 
+        # функция обновления экрана
         def update_screen():
             background = pygame.transform.scale(load_image(
                 'background_test.png'), (self.WIDTH, self.HEIGHT))
@@ -419,6 +483,7 @@ class Game:
         rules = Button(self.buttons_group, 340, 420, 'rules')
         exit_btn = Button(self.buttons_group, 340, 540, 'exit')
 
+        # основной цикл
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -429,12 +494,14 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        # нажатие кнопок
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 button.press()
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
+                        # отжатие кнопок
                         for button in self.buttons_group:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 if button.unpress():
@@ -444,7 +511,6 @@ class Game:
                                         return self.game_rules
                                     elif button == exit_btn:
                                         self.terminate()
-                        self.buttons_group.update()
 
             update_screen()
             self.buttons_group.draw(self.screen)
@@ -454,6 +520,9 @@ class Game:
             pygame.display.flip()
 
     def game_rules(self):
+        '''
+        Леша
+        '''
         self.buttons_group.empty()
         page_num = 0
         rules = {
@@ -567,7 +636,6 @@ class Game:
                                             page_num -= 1
                                     elif button == back:
                                         return self.start_screen
-                        self.buttons_group.update()
 
             update_screen()
             self.buttons_group.draw(self.screen)
@@ -576,6 +644,9 @@ class Game:
             pygame.display.flip()
 
     def game_connection_screen(self):
+        '''
+        Функция, вызывающая экран поиска игры
+        '''
         self.buttons_group.empty()
 
         def update_screen():
@@ -591,10 +662,13 @@ class Game:
                       'back', size=(150, 50), fontsize=50)
 
         counter = 0
+        # флаги, с которыми работают потоки
         flags = {'searching_for_game': False, 'game_found': False, 'searching_for_players': False,
                  'players': [{'ip': self.node.ip}], 'game_host': {'ip': '1'},
                  'game_connected': False,
                  'game_closed': False, 'game_started': {'text': False}}
+
+        # основной цикл
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -619,6 +693,7 @@ class Game:
                             if button.rect.collidepoint(pygame.mouse.get_pos()):
                                 if button.unpress():
                                     if button == connect:
+                                        # начало поиска игры
                                         flags['searching_for_game'] = True
                                         flags['game_found'] = False
                                         flags['game_connected'] = False
@@ -634,6 +709,7 @@ class Game:
                                                              False]], 1])
                                         thread.start()
                                     elif button == new_game:
+                                        # начало поиска игроков
                                         notification = Notification(self.notification_group,
                                                                     ('searching for players (1/4).',
                                                                      self.node.ip),
@@ -647,12 +723,14 @@ class Game:
                                         thread.start()
                                         notification.add_button.make_inactive()
                                     elif button == back:
+                                        # перемещение на стартовый экран
                                         self.notification_group.empty()
                                         return self.start_screen
                         for elem in self.notification_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
                                     if elem == notification.close_button:
+                                        # закрытие уведомления и отмена поиска игры или отмена подключения
                                         if elem.rect.collidepoint(pygame.mouse.get_pos()):
                                             self.notification_group.empty()
                                             if flags['game_found']:
@@ -671,6 +749,7 @@ class Game:
                                                 self.stop_threads()
 
                                     elif elem == notification.add_button:
+                                        # начало игры, если достаточно игроков
                                         players = [elem['ip']
                                                    for elem in flags['players']]
                                         if len(players) > 1:
@@ -692,8 +771,6 @@ class Game:
                                                 map(str, self.players)), deck=list(map(str, self.deck)))
                                             return self.game_screen
 
-                        self.buttons_group.update()
-
             update_screen()
             if not self.notification_group:
                 for elem in self.buttons_group:
@@ -703,11 +780,13 @@ class Game:
                     elem.make_inactive()
             self.buttons_group.draw(self.screen)
             if flags['searching_for_game']:
+                # обновление текста о поиске
                 if counter % 20 == 0:
                     notification.update(
                         text=('searching for the game' + "." * abs(counter % 3 - 3),))
             if flags['game_found']:
                 if not flags['game_connected']:
+                    # подключение к игре
                     if thread.is_alive():
                         self.stop_threads()
                     flags['game_connected'] = True
@@ -723,16 +802,20 @@ class Game:
                                        [[flags, 'game_started', '__VALUE__']], 1])
                     thread.start()
                 if counter % 20 == 0:
+                    # обновдление текста об игре
                     notification.update(text=('game is ready', f"game host: {flags['game_host']['ip']}",
                                               'connecting' + "." * abs(counter % 3 - 3)))
             if flags['game_closed']:
+                # обновление текста о том, что игрок вышел
                 notification.update(
                     text=('host has left the game', 'please restart search'))
                 if thread.is_alive():
                     self.stop_threads()
             if flags['searching_for_players']:
+                # обновление текста об игре
                 players = [elem['ip'] for elem in flags['players']]
                 if len(players) == 4:
+                    # начало игры
                     self.players = [
                         Player(player, player == self.node.ip) for player in players]
                     shuffle(self.players)
@@ -748,6 +831,7 @@ class Game:
                     else:
                         notification.add_button.make_inactive()
             if flags['game_started']['text']:
+                # начало игры (на принимающей стороне)
                 self.players = list(
                     map(eval, flags['game_started']['players']))
                 self.deck = list(
@@ -767,7 +851,11 @@ class Game:
             pygame.display.flip()
 
     def game_screen(self):
+        '''
+        Функция, вызывающая экран игры
+        '''
         latest_message = {'message': {'ip': None}}
+        # создание потока, принимающего сообщения
         listener_thread = MyThread(
             self.node.recieve, 'reciever', latest_message, 'message')
         listener_thread.start()
@@ -790,6 +878,7 @@ class Game:
                 'background_test.png'), (self.WIDTH, self.HEIGHT))
             self.screen.blit(background, (0, 0))
 
+        # покупка карты из магазина
         def buy_card(player, card_sprite, is_myself):
             player.get_cards()[card_sprite.card.type].append(card_sprite.card)
             player.money -= card_sprite.card.cost
@@ -805,6 +894,7 @@ class Game:
                 shop_notification.sprite.kill()
                 self.shop_notifications_group.empty()
 
+        # постройка достропримечательности
         def build(player, landmark_sprite, is_myself):
             if isinstance(landmark_sprite, Landmark):
                 player.get_landmarks()[landmark_sprite.short_name].build()
@@ -831,6 +921,7 @@ class Game:
                 LandmarkSprite(self.landmark_group,
                                self.myself.landmarks[key], i)
 
+        # обработка срабатывающих карт на бросок кубика
         def trigger_cards(die_roll, cur_player):
             result = 0
             for player in self.players:
@@ -910,6 +1001,7 @@ class Game:
 
             return result
 
+        # отнятие монет у игрока (за красные здания)
         def take_money(amount):
             notification = Notification(self.notification_group, [
                                         f'Click on another player to take {amount}', 'coins from them'])
@@ -960,6 +1052,7 @@ class Game:
                 self.clock.tick(self.FPS)
                 pygame.display.flip()
 
+        # бросок кубика
         def dice_roll(amount):
             if amount == 2 and self.myself.get_landmarks()['park'].get_active():
                 roll_1 = randint(1, 6)
@@ -1003,13 +1096,16 @@ class Game:
                                                 f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
                 return cur_die_roll, notification
 
+        # создание магазина
         for x in range(5):
             for y in range(3):
                 ShopCardSprite(self.shop_group, self.deck.pop(), x, y)
 
+        # определения себя в пуле игроков
         self.myself = list(filter(lambda x: x.get_ip() ==
                                   self.node.ip, self.players))[0]
 
+        # создание иконок игроков
         for i, player in enumerate(self.players):
             PlayerIcon(self.players_icon_group, i ==
                        0, self.myself == player, player, i)
@@ -1019,13 +1115,19 @@ class Game:
         end_turn = Button(self.buttons_group, 1060, 650, 'end turn',
                           (200, 50), fontsize=50) if self.players[0] == self.myself else None
 
+        # создание спрайтов достопримечательносей
         for i, key in enumerate(self.myself.landmarks):
             LandmarkSprite(self.landmark_group, self.myself.landmarks[key], i)
 
+        # переменная текущего хода
         cur_turn = 0
 
+        # основной цикл
         while True:
+            # определение текущего игрока
             cur_player = self.players[cur_turn % len(self.players)]
+
+            # определение, нужно ли включать кнопку передачи хода
             if cur_player != self.myself and end_turn is not None:
                 end_turn.kill()
                 end_turn = None
@@ -1033,6 +1135,7 @@ class Game:
                 end_turn = Button(self.buttons_group, 1060,
                                   650, 'end turn', (200, 50), fontsize=50)
 
+            # бросок кубика, если вы - активный игрок
             if cur_player == self.myself and not cur_player.dice_rolled:
                 self.myself.reroll = True
                 cur_player.dice_rolled = True
@@ -1042,6 +1145,7 @@ class Game:
                     notification = DieRollNotification(
                         self.roll_notification_group, ('How many dice you', 'want to roll?'))
 
+            # Леша ???
             self.block_group.empty()
             for i, type_ in enumerate(self.myself.cards):
                 counter = Counter(
@@ -1104,10 +1208,12 @@ class Game:
                                             self.players)]
                                         cur_player.buy_flag = True
                             for card in self.shop_group:
+                                # открытие уведомления при клике на карту
                                 if card.rect.collidepoint(pygame.mouse.get_pos()):
                                     shop_notification = ShopNotification(self.shop_notifications_group, card, self.myself, self.myself ==
                                                                          cur_player)
                             for landmark in self.landmark_group:
+                                # открытие уведомления при клике на достопримечательность
                                 if landmark.rect.collidepoint(pygame.mouse.get_pos()):
                                     shop_notification = ShopNotification(self.shop_notifications_group, landmark,
                                                                          self.myself, self.myself ==
@@ -1147,8 +1253,8 @@ class Game:
                             elif not elem.rect.collidepoint(pygame.mouse.get_pos()):
                                 self.notification_group.empty()
                         for elem in self.roll_notification_group:
+                            # вопрос игроку о том, сколько кубов кидать и нужно ли их перебрасывать
                             if isinstance(elem, Button):
-                                print(elem.text)
                                 if elem.unpress() and elem.rect.collidepoint(pygame.mouse.get_pos()):
                                     if elem == notification.close_button:
                                         if notification.close_button.text == 'roll 1':
@@ -1172,14 +1278,17 @@ class Game:
                                         elif notification.close_button.text == 'pass':
                                             self.roll_notification_group.empty()
 
+            # обновление группы уведомлений и покупке карт, если она существует
             try:
                 shop_notification.update(self.myself == cur_player)
             except Exception:
                 pass
 
+            # обработка прищедших сообщений
             if latest_message['message']['ip'] is not None:
                 message = latest_message['message']
                 if message['text'] == 'end turn':
+                    # передача хода
                     self.notification_group.empty()
                     if not self.extra_turn:
                         cur_turn += 1
@@ -1189,6 +1298,7 @@ class Game:
                     cur_player.buy_flag = True
                     cur_player.dice_rolled = False
                 elif message['text'] == 'exit game':
+                    # выход игрока из игры
                     for i, player in enumerate(self.players):
                         if player.get_ip() == message['ip']:
                             if cur_player == player:
@@ -1199,9 +1309,11 @@ class Game:
                         self.notification_group.empty()
                         return self.start_screen
                 elif message['text'] == 'buy':
+                    # покупка карты
                     buy_card(list(filter(lambda x: x.get_ip() == message['ip'], self.players))[
                              0], list(filter(lambda x: x.get_coords() == message['coords'], self.shop_group))[0], False)
                 elif 'roll' in message['text']:
+                    # бросок кубика
                     cur_die_roll = int(message['text'].split()[1])
                     cur_player.dice_rolled = True
                     result = trigger_cards(
@@ -1216,6 +1328,7 @@ class Game:
                                                     'That player takes an extra turn'])
                         self.extra_turn = True
                 elif 'take' in message['text']:
+                    # отнятие монет
                     player = list(filter(lambda x: x.get_ip() ==
                                          message['ip'], self.players))[0]
                     victim = list(filter(lambda x: x.get_ip() ==
@@ -1229,6 +1342,7 @@ class Game:
                         notification = Notification(self.notification_group, [
                                                     f'{player.get_ip()} took {message["coins"]} coins', f'from {victim.get_ip()}'])
                 elif message['text'] == 'landmark':
+                    # покупка достопримечательностей
                     player = list(filter(lambda x: x.get_ip() ==
                                          message['ip'], self.players))[0]
 
@@ -1240,10 +1354,12 @@ class Game:
                                                     f'{player} has won the game!'], add_button='exit')
 
                 latest_message['message'] = {'ip': None}
+                # перезапуск потока
                 listener_thread = MyThread(
                     self.node.recieve, 'reciever', latest_message, 'message')
                 listener_thread.start()
 
+            # обновление иконок игроков
             i = 0
             for elem in self.players_icon_group:
                 if elem.player in self.players:
@@ -1267,11 +1383,14 @@ class Game:
             pygame.display.flip()
 
     def stop_threads(self):
+        '''
+        Функция остановке приёма всех сообщений
+        '''
         self.node.send('__STOP_RECIEVE__', self.node.ip)
 
 
 def main():
-    Game()
+    Game()  # начало игры
 
 
 if __name__ == '__main__':

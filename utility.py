@@ -6,6 +6,9 @@ import copy
 
 
 class MyThread(threading.Thread):
+    '''
+    Класс потока, который принимает функциюи запускает её
+    '''
     def __init__(self, func, name, *args, **kwargs):
         super().__init__(name=name)
         self.func = func
@@ -19,6 +22,9 @@ class MyThread(threading.Thread):
 
 
 class Player:
+    '''
+    Класс игрока
+    '''
     def __init__(self, ip, host=False):
         self.ip = ip
         self.host = host
@@ -68,6 +74,9 @@ class Player:
 
 
 class Card:
+    '''
+    Класс карты
+    '''
     def __init__(self, image, name, type_, die_roll, description, cost):
         self.image = image
         self.name = name
@@ -93,6 +102,9 @@ class Card:
 
 
 class Landmark:
+    '''
+    Класс достопримечательности
+    '''
     def __init__(self, image, image_wb, name, short_name, description, cost, is_active=False):
         self.image_wb = image_wb
         self.image_clr = image
@@ -121,6 +133,9 @@ class Landmark:
 
 
 def load_image(name, colorkey=None):
+    '''
+    Функция хагрузки изображения
+    '''
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname).convert()
     if colorkey is not None:

@@ -1,6 +1,7 @@
 from utility import Card
 
 
+# описание всех карт
 ALL_CARDS = {
     'wheat_field': Card('cards/Wheat_Field.png', 'Wheat Field', 'wheat', (1,), ['Get 1 coin', '(On everyone`s turn)'], 1),
     'apple_orchard': Card('cards/Apple_Orchard.png', 'Apple Orchard', 'wheat', (10,),
