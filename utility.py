@@ -134,7 +134,7 @@ class Landmark:
 
 def load_image(name, colorkey=None):
     '''
-    Функция хагрузки изображения
+    Функция загрузки изображения
     '''
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname).convert()

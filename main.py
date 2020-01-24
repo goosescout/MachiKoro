@@ -111,7 +111,7 @@ class ShopNotification(pygame.sprite.Sprite):
 
 class Table:
     '''
-    Леша
+    Класс стола для отрисовки неизменяемых элементов
     '''
     def __init__(self, surface):
         self.start_x_pos = 200
@@ -176,7 +176,8 @@ class Table:
 
 class Block(pygame.sprite.Sprite):
     '''
-    Леша
+    Класс игрового блока Игрока.
+    В каждом блоке содержится связка с картой и количество каждой у игрока
     '''
     def __init__(self, group, block, amount, x, y):
         super().__init__(group)
@@ -201,7 +202,8 @@ class Block(pygame.sprite.Sprite):
 
 class BlockNotification(pygame.sprite.Sprite):
     '''
-    Леша
+    Класс уведомления, связанный с отображением информации об
+    уже купленных игроком картах.
     '''
     def __init__(self, group, card):
         super().__init__(group)
@@ -251,7 +253,7 @@ class ShopCardSprite(pygame.sprite.Sprite):
 
 class LandmarkSprite(pygame.sprite.Sprite):
     '''
-    Леша
+    Класс Достопримечательности на столе игрока
     '''
     def __init__(self, group, landmark, coord):
         super().__init__(group)
@@ -521,7 +523,7 @@ class Game:
 
     def game_rules(self):
         '''
-        Леша
+        Функция, вызывающая экран с правилами
         '''
         self.buttons_group.empty()
         page_num = 0
@@ -1145,7 +1147,7 @@ class Game:
                     notification = DieRollNotification(
                         self.roll_notification_group, ('How many dice you', 'want to roll?'))
 
-            # Леша ???
+            # создание спрайтов блоков игрока
             self.block_group.empty()
             for i, type_ in enumerate(self.myself.cards):
                 counter = Counter(
