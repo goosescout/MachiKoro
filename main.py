@@ -1056,46 +1056,58 @@ class Game:
                     self.cursor_group.draw(self.screen)
                 self.clock.tick(self.FPS)
                 pygame.display.flip()
+        
+        self.prev_roll = 0
 
         # бросок кубика
-        def dice_roll(amount):
+        def dice_roll(amount, get_same=False):
+            if get_same:
+                cur_die_roll = self.prev_roll
+                self.node.send(f'roll {cur_die_roll}', map(
+                        lambda x: x.get_ip(), self.players))
+                result = trigger_cards(cur_die_roll, self.myself)
+                s = '' if result == 1 else 's'
+                notification = Notification(self.notification_group, [
+                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
+                return str(self.prev_roll), notification
             if amount == 2 and self.myself.get_landmarks()['park'].get_active():
                 roll_1 = randint(1, 6)
                 roll_2 = randint(1, 6)
                 cur_die_roll = roll_1 + roll_2
                 self.myself.dice_rolled = True
-                result = trigger_cards(cur_die_roll, self.myself)
-                s = '' if result == 1 else 's'
+                if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
+                    self.prev_roll = cur_die_roll
+                else:
+                    result = trigger_cards(cur_die_roll, self.myself)
+                    s = '' if result == 1 else 's'
                 if roll_1 == roll_2:
                     self.node.send(f'roll {cur_die_roll} __EXTRA_TURN__', map(
                         lambda x: x.get_ip(), self.players))
-                    if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
-                        notification = DieRollNotification(self.notification_group, [
-                            f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
-                            'You take an extra turn'], 'reroll', 'pass')
-                    else:
-                        notification = Notification(self.notification_group, [
-                                                    f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
-                                                    'You take an extra turn'])
+                    notification = Notification(self.notification_group, [
+                                                f'You rolled {cur_die_roll}', f'You got {result} coin{s}',
+                                                'You take an extra turn'])
                     return str(cur_die_roll) + ' __EXTRA_TURN__', notification
                 else:
                     if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
-                        notification = DieRollNotification(self.notification_group, [
-                            f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
+                        notification = DieRollNotification(self.roll_notification_group, [
+                            f'You rolled {cur_die_roll}'], 'reroll', 'pass')
                     else:
                         notification = Notification(self.notification_group, [
                                                     f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
                     return cur_die_roll, notification
             else:
                 cur_die_roll = sum([randint(1, 6) for _ in range(amount)])
-                self.node.send(f'roll {cur_die_roll}', map(
-                    lambda x: x.get_ip(), self.players))
-                cur_player.dice_rolled = True
-                result = trigger_cards(cur_die_roll, cur_player)
-                s = '' if result == 1 else 's'
                 if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
-                    notification = DieRollNotification(self.notification_group, [
-                        f'You rolled {cur_die_roll}', f'You got {result} coin{s}'], 'reroll', 'pass')
+                    self.prev_roll = cur_die_roll
+                else:
+                    self.node.send(f'roll {cur_die_roll}', map(
+                        lambda x: x.get_ip(), self.players))
+                    cur_player.dice_rolled = True
+                    result = trigger_cards(cur_die_roll, cur_player)
+                    s = '' if result == 1 else 's'
+                if self.myself.get_landmarks()['tower'].get_active() and self.myself.can_reroll():
+                    notification = DieRollNotification(self.roll_notification_group, [
+                        f'You rolled {cur_die_roll}'], 'reroll', 'pass')
                 else:
                     notification = Notification(self.notification_group, [
                                                 f'You rolled {cur_die_roll}', f'You got {result} coin{s}'])
@@ -1276,12 +1288,15 @@ class Game:
                                                 notification = DieRollNotification(
                                                     self.roll_notification_group, ('How many dice you', 'want to roll?'))
                                     elif elem == notification.add_button:
-                                        if notification.close_button.text == 'roll 2':
+                                        if notification.add_button.text == 'roll 2':
                                             self.roll_notification_group.empty()
                                             cur_die_roll, notification = dice_roll(
                                                 2)
-                                        elif notification.close_button.text == 'pass':
+                                        elif notification.add_button.text == 'pass':
+                                            cur_die_roll, notification = dice_roll(
+                                                0, True)
                                             self.roll_notification_group.empty()
+
 
             # обновление группы уведомлений и покупке карт, если она существует
             try:
