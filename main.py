@@ -743,6 +743,7 @@ class Game:
                                                     'search stopped')
                                             flags['searching_for_game'] = False
                                             flags['game_found'] = False
+                                            flags['game_closed'] = False
                                             flags['searching_for_players'] = False
                                             flags['players'] = [
                                                 {'ip': self.node.ip}]
@@ -840,7 +841,7 @@ class Game:
                     map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
                 for card in self.deck:
                     card.cost = card.cost
-                    card.die_roll = card.die_roll
+                    card.die_roll = card.get_die_roll()
                     card.description = card.description
                 self.stop_threads()
                 return self.game_screen
@@ -931,38 +932,38 @@ class Game:
                     if type_ == 'cup' and cur_player != player:
                         if player.get_landmarks()['mall'].get_active():
                             for card in player.get_cards()[type_]:
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += take_money(
                                             card.get_production() + 1)
                         else:
                             for card in player.get_cards()[type_]:
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += take_money(card.get_production())
 
                     elif type_ in {'wheat', 'cow', 'gear'}:
                         for card in player.get_cards()[type_]:
-                            if die_roll in card.die_roll:
+                            if die_roll in card.get_die_roll():
                                 if player == self.myself:
                                     result += card.get_production()
                                 player.money += card.get_production()
                     elif type_ == 'bread' and cur_player == player:
                         if player.get_landmarks()['mall'].get_active():
                             for card in player.get_cards()[type_]:
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += card.get_production() + 1
                                     player.money += card.get_production() + 1
                         else:
                             for card in player.get_cards()[type_]:
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += card.get_production()
                                     player.money += card.get_production()
                     elif type_ == 'fruit' and cur_player == player:
                         for card in player.get_cards()[type_]:
-                            if die_roll in card.die_roll:
+                            if die_roll in card.get_die_roll():
                                 if player == self.myself:
                                     result += len(player.get_cards()
                                                   ['wheat']) * 3
@@ -971,14 +972,14 @@ class Game:
                     elif type_ == 'factory' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'Cheese Factory':
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += len(player.get_cards()
                                                       ['cow']) * 3
                                     player.money += len(player.get_cards()
                                                         ['cow']) * 3
                             else:  # Furniture Factory
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += len(player.get_cards()
                                                       ['gear']) * 3
@@ -987,11 +988,11 @@ class Game:
                     elif type_ == 'major' and cur_player == player:
                         for card in player.get_cards()[type_]:
                             if card.get_name() == 'TV station':
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += take_money(card.get_production())
                             elif card.get_name() == 'Stadium':
-                                if die_roll in card.die_roll:
+                                if die_roll in card.get_die_roll():
                                     if player == self.myself:
                                         result += (len(self.players) - 1) * 2
                                     player.money += (len(self.players) - 1) * 2
@@ -999,8 +1000,10 @@ class Game:
                                         if inner_player != cur_player:
                                             inner_player.money -= 2
                             else:  # Business Center
-                                pass
-
+                                if die_roll in card.get_die_roll():
+                                    if player == self.myself:
+                                        result += card.get_production()
+                                    player.money += card.get_production()
             return result
 
         # отнятие монет у игрока (за красные здания)

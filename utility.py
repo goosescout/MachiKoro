@@ -100,6 +100,9 @@ class Card:
     def get_production(self):
         return int(self.description[0].split()[1])
 
+    def get_die_roll(self):
+        return self.die_roll
+
 
 class Landmark:
     '''

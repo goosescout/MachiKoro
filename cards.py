@@ -24,7 +24,7 @@ ALL_CARDS = {
     'stadium': Card('cards/Stadium.png', 'Stadium', 'major', (6,), ['Get 2 coins from all players','(On your turn only)'],
                     6),
     'business_center': Card('cards/Business_Center.png', 'Business Center', 'major', (6,),
-                            ['Trade one non-major establishment','with another player','(On your turn only)'], 6),
+                            ['Get 10 coins','(On your turn only)'], 6),
     'tv_station': Card('cards/TV_Station.png', 'TV Station', 'major', (6,),
                        ['Take 5 coins grom any one player','(On your turn only)'], 7)
 }
