@@ -43,7 +43,7 @@ class Player:
             'tower': Landmark('landmarks/Radio_Tower.png', 'landmarks/Radio_Tower_WB.png', 'Radio Tower', 'tower',
                               ['Once every turn, you can', 'choose to re-roll your dice'], 22)
         }
-        self.money = 30
+        self.money = 3
         self.buy_flag = True
         self.dice_rolled = False
         self.reroll = False
