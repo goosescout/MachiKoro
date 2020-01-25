@@ -6,6 +6,9 @@ import copy
 
 
 class MyThread(threading.Thread):
+    '''
+    Класс потока, который принимает функциюи запускает её
+    '''
     def __init__(self, func, name, *args, **kwargs):
         super().__init__(name=name)
         self.func = func
@@ -19,6 +22,9 @@ class MyThread(threading.Thread):
 
 
 class Player:
+    '''
+    Класс игрока
+    '''
     def __init__(self, ip, host=False):
         self.ip = ip
         self.host = host
@@ -37,7 +43,7 @@ class Player:
             'tower': Landmark('landmarks/Radio_Tower.png', 'landmarks/Radio_Tower_WB.png', 'Radio Tower', 'tower',
                               ['Once every turn, you can', 'choose to re-roll your dice'], 22)
         }
-        self.money = 3
+        self.money = 30
         self.buy_flag = True
         self.dice_rolled = False
         self.reroll = False
@@ -68,6 +74,9 @@ class Player:
 
 
 class Card:
+    '''
+    Класс карты
+    '''
     def __init__(self, image, name, type_, die_roll, description, cost):
         self.image = image
         self.name = name
@@ -91,8 +100,14 @@ class Card:
     def get_production(self):
         return int(self.description[0].split()[1])
 
+    def get_die_roll(self):
+        return self.die_roll
+
 
 class Landmark:
+    '''
+    Класс достопримечательности
+    '''
     def __init__(self, image, image_wb, name, short_name, description, cost, is_active=False):
         self.image_wb = image_wb
         self.image_clr = image
@@ -121,6 +136,9 @@ class Landmark:
 
 
 def load_image(name, colorkey=None):
+    '''
+    Функция загрузки изображения
+    '''
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname).convert()
     if colorkey is not None:
