@@ -424,6 +424,9 @@ class Button(pygame.sprite.Sprite):
                 load_image('button_inactive.png'), self.size)
         self.image.blit(self.rendered_text, self.place)
 
+    def is_active(self):
+        return self.active
+
 
 class Game:
     '''
@@ -505,14 +508,13 @@ class Game:
                     if event.button == 1:
                         # отжатие кнопок
                         for button in self.buttons_group:
-                            if button.rect.collidepoint(pygame.mouse.get_pos()):
-                                if button.unpress():
-                                    if button == play:
-                                        return self.game_connection_screen
-                                    elif button == rules:
-                                        return self.game_rules
-                                    elif button == exit_btn:
-                                        self.terminate()
+                            if button.unpress() and button.rect.collidepoint(pygame.mouse.get_pos()):
+                                if button == play:
+                                    return self.game_connection_screen
+                                elif button == rules:
+                                    return self.game_rules
+                                elif button == exit_btn:
+                                    self.terminate()
 
             update_screen()
             self.buttons_group.draw(self.screen)
@@ -628,16 +630,15 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         for button in self.buttons_group:
-                            if button.rect.collidepoint(pygame.mouse.get_pos()):
-                                if button.unpress():
-                                    if button == next_btn:
-                                        if page_num < 4:
-                                            page_num += 1
-                                    elif button == prev_btn:
-                                        if page_num > 0:
-                                            page_num -= 1
-                                    elif button == back:
-                                        return self.start_screen
+                            if button.unpress() and button.rect.collidepoint(pygame.mouse.get_pos()):
+                                if button == next_btn:
+                                    if page_num < 4:
+                                        page_num += 1
+                                elif button == prev_btn:
+                                    if page_num > 0:
+                                        page_num -= 1
+                                elif button == back:
+                                    return self.start_screen
 
             update_screen()
             self.buttons_group.draw(self.screen)
@@ -692,42 +693,41 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         for button in self.buttons_group:
-                            if button.rect.collidepoint(pygame.mouse.get_pos()):
-                                if button.unpress():
-                                    if button == connect:
-                                        # начало поиска игры
-                                        flags['searching_for_game'] = True
-                                        flags['game_found'] = False
-                                        flags['game_connected'] = False
-                                        flags['game_closed'] = False
-                                        notification = Notification(self.notification_group,
-                                                                    ('searching for the game.',))
-                                        thread = MyThread(self.node.await_recieve, 'serching',
-                                                          ['searching for players', 'text',
-                                                           [[flags, 'game_found', True],
-                                                            [flags, 'game_host',
-                                                                '__VALUE__'],
-                                                            [flags, 'searching_for_game',
-                                                             False]], 1])
-                                        thread.start()
-                                    elif button == new_game:
-                                        # начало поиска игроков
-                                        notification = Notification(self.notification_group,
-                                                                    ('searching for players (1/4).',
-                                                                     self.node.ip),
-                                                                    add_button='start')
-                                        flags['searching_for_players'] = True
-                                        thread = MyThread(self.node.await_recieve, 'connection',
-                                                          ['connect', 'text', [
-                                                              [flags, 'players', '__VALUE__']], -1],
-                                                          ['disconnect', 'text',
-                                                           [[flags, 'players', '__VALUE_DEL__']], -1])
-                                        thread.start()
-                                        notification.add_button.make_inactive()
-                                    elif button == back:
-                                        # перемещение на стартовый экран
-                                        self.notification_group.empty()
-                                        return self.start_screen
+                            if button.unpress() and button.rect.collidepoint(pygame.mouse.get_pos()):
+                                if button == connect:
+                                    # начало поиска игры
+                                    flags['searching_for_game'] = True
+                                    flags['game_found'] = False
+                                    flags['game_connected'] = False
+                                    flags['game_closed'] = False
+                                    notification = Notification(self.notification_group,
+                                                                ('searching for the game.',))
+                                    thread = MyThread(self.node.await_recieve, 'serching',
+                                                        ['searching for players', 'text',
+                                                        [[flags, 'game_found', True],
+                                                        [flags, 'game_host',
+                                                            '__VALUE__'],
+                                                        [flags, 'searching_for_game',
+                                                            False]], 1])
+                                    thread.start()
+                                elif button == new_game:
+                                    # начало поиска игроков
+                                    notification = Notification(self.notification_group,
+                                                                ('searching for players (1/4).',
+                                                                    self.node.ip),
+                                                                add_button='start')
+                                    flags['searching_for_players'] = True
+                                    thread = MyThread(self.node.await_recieve, 'connection',
+                                                        ['connect', 'text', [
+                                                            [flags, 'players', '__VALUE__']], -1],
+                                                        ['disconnect', 'text',
+                                                        [[flags, 'players', '__VALUE_DEL__']], -1])
+                                    thread.start()
+                                    notification.add_button.make_inactive()
+                                elif button == back:
+                                    # перемещение на стартовый экран
+                                    self.notification_group.empty()
+                                    return self.start_screen
                         for elem in self.notification_group:
                             if isinstance(elem, Button):
                                 if elem.unpress():
@@ -777,10 +777,12 @@ class Game:
             update_screen()
             if not self.notification_group:
                 for elem in self.buttons_group:
-                    elem.make_active()
+                    if not elem.is_active():
+                        elem.make_active()
             else:
                 for elem in self.buttons_group:
-                    elem.make_inactive()
+                    if elem.is_active():
+                        elem.make_inactive()
             self.buttons_group.draw(self.screen)
             if flags['searching_for_game']:
                 # обновление текста о поиске
@@ -1206,7 +1208,7 @@ class Game:
                     if event.button == 1:
                         if not self.notification_group and not self.roll_notification_group:
                             for button in self.buttons_group:
-                                if button.rect.collidepoint(pygame.mouse.get_pos()) and button.unpress():
+                                if button.unpress() and button.rect.collidepoint(pygame.mouse.get_pos()):
                                     if button == exit_btn:
                                         self.stop_threads()
                                         self.node.send(
