@@ -702,7 +702,7 @@ class Game:
                                     flags['game_closed'] = False
                                     notification = Notification(self.notification_group,
                                                                 ('searching for the game.',))
-                                    thread = MyThread(self.node.await_recieve, 'serching',
+                                    thread = MyThread(self.node.await_receive, 'serching',
                                                         ['searching for players', 'text',
                                                         [[flags, 'game_found', True],
                                                         [flags, 'game_host',
@@ -717,7 +717,7 @@ class Game:
                                                                     self.node.ip),
                                                                 add_button='start')
                                     flags['searching_for_players'] = True
-                                    thread = MyThread(self.node.await_recieve, 'connection',
+                                    thread = MyThread(self.node.await_receive, 'connection',
                                                         ['connect', 'text', [
                                                             [flags, 'players', '__VALUE__']], -1],
                                                         ['disconnect', 'text',
@@ -796,7 +796,7 @@ class Game:
                         self.stop_threads()
                     flags['game_connected'] = True
                     self.node.send('connect', flags['game_host']['ip'])
-                    thread = MyThread(self.node.await_recieve, 'game_start_stop', ['search stopped', 'text',
+                    thread = MyThread(self.node.await_receive, 'game_start_stop', ['search stopped', 'text',
                                                                                    [[flags, 'game_host', {'ip': -1}],
                                                                                     [flags, 'game_found', False],
                                                                                     [flags, 'searching_for_game',
@@ -862,7 +862,7 @@ class Game:
         latest_message = {'message': {'ip': None}}
         # создание потока, принимающего сообщения
         listener_thread = MyThread(
-            self.node.recieve, 'reciever', latest_message, 'message')
+            self.node.receive, 'receiver', latest_message, 'message')
         listener_thread.start()
         self.buttons_group.empty()
         self.notification_group.empty()
@@ -1380,7 +1380,7 @@ class Game:
                 latest_message['message'] = {'ip': None}
                 # перезапуск потока
                 listener_thread = MyThread(
-                    self.node.recieve, 'reciever', latest_message, 'message')
+                    self.node.receive, 'receiver', latest_message, 'message')
                 listener_thread.start()
 
             # обновление иконок игроков
@@ -1410,7 +1410,7 @@ class Game:
         '''
         Функция остановке приёма всех сообщений
         '''
-        self.node.send('__STOP_RECIEVE__', self.node.ip)
+        self.node.send('__STOP_RECEIVE__', self.node.ip)
 
 
 def main():

@@ -33,7 +33,7 @@ class Node:
         else:
             sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
 
-    def recieve(self, var, key):
+    def receive(self, var, key):
         '''
         Awaits for any one message and writes it in a variable provided.
         '''
@@ -63,7 +63,7 @@ class Node:
             var[key] = message
         return message
 
-    def await_recieve(self, *args):
+    def await_receive(self, *args):
         '''
         Awaits for a particular message.
 
@@ -72,12 +72,12 @@ class Node:
         Blocks must be lists (not tuples).
         At least one block must be passed as an argument.
         data - message that should match
-        match - part of a recieved message that should match (for example ip, message, etc)
-        flag - variables that should change once the message is recieved. Flag: [[variable_name, variable_key, value], ...]
+        match - part of a received message that should match (for example ip, message, etc)
+        flag - variables that should change once the message is received. Flag: [[variable_name, variable_key, value], ...]
             variable_name - name of a variable (it must be a dictionary)
             variable_key - key in the variable
-            value - value to write in the variable (can be "__VALUE__" to write the recieved message or "__MATCH__" to write the matching value for message, or "__VALUE_DEL__" and "___MATCH_DEL__")
-        stop_count - number of matches after which the programm stops to recieve them (0 - never stop)
+            value - value to write in the variable (can be "__VALUE__" to write the received message or "__MATCH__" to write the matching value for message, or "__VALUE_DEL__" and "___MATCH_DEL__")
+        stop_count - number of matches after which the programm stops to receive them (0 - never stop)
         '''
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
@@ -98,7 +98,7 @@ class Node:
                     message[key] = eval(message[key])
                 except Exception:
                     pass
-            if message['text'] == '__STOP_RECIEVE__':
+            if message['text'] == '__STOP_RECEIVE__':
                 return
             for i, (data, match, flag, stop_count, stop) in enumerate(zip(datas, matches, flags, stop_counts, stops)):
                 if data == message[match]:
