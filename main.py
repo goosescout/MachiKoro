@@ -6,6 +6,7 @@ from collections import Counter
 from random import shuffle, randint
 
 import pygame
+import json
 
 from node import Node
 from utility import MyThread, Player, load_image, Card, Landmark
@@ -838,7 +839,7 @@ class Game:
             if flags['game_started']['text']:
                 # начало игры (на принимающей стороне)
                 self.players = list(
-                    map(eval, flags['game_started']['players']))
+                    map(json.loads, flags['game_started']['players']))
                 self.deck = list(
                     map(lambda x: ALL_CARDS[x], flags['game_started']['deck']))
                 for card in self.deck:
