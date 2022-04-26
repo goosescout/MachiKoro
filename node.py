@@ -1,4 +1,5 @@
 import socket
+import json
 
 from utility import MyThread, Player, Card
 
@@ -25,13 +26,13 @@ class Node:
         if ip is None:
             to_ip = '.'.join(self.ip.split('.')[:-1])
             for i in range(256):
-                sock.sendto(bytes(str(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
+                sock.sendto(bytes(json.dumps(message), encoding='utf-8'), (f'{to_ip}.{i}', self.port))
         elif isinstance(ip, list) or isinstance(ip, map):
             for elem in ip:
                 if elem != self.ip:
-                    sock.sendto(bytes(str(message), encoding='utf-8'), (elem, self.port))
+                    sock.sendto(bytes(json.dumps(message), encoding='utf-8'), (elem, self.port))
         else:
-            sock.sendto(bytes(str(message), encoding='utf-8'), (ip, self.port))
+            sock.sendto(bytes(json.dumps(message), encoding='utf-8'), (ip, self.port))
 
     def receive(self, var, key):
         '''
@@ -51,10 +52,10 @@ class Node:
         sock.bind(('0.0.0.0', self.port))
 
         s = sock.recv(4096)
-        message = eval(s.decode('utf-8'))
+        message = json.loads(s.decode('utf-8'))
         for mes_key in message.keys():
             try:
-                message[mes_key] = eval(message[key])
+                message[mes_key] = json.loads(message[key])
             except Exception:
                 pass
         if isinstance(var[key], list):
@@ -92,10 +93,10 @@ class Node:
 
         while True:
             s = sock.recv(65536)
-            message = eval(s.decode('utf-8'))
+            message = json.loads(s.decode('utf-8'))
             for key in message.keys():
                 try:
-                    message[key] = eval(message[key])
+                    message[key] = json.loads(message[key])
                 except Exception:
                     pass
             if message['text'] == '__STOP_RECEIVE__':
